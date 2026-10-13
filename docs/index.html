@@ -471,6 +471,24 @@ Département de mathématiques et de statistique, Université Laval. Cette page 
 </div>
 </div>
 </div>
+<script>
+(() => {
+  // Mesure le décalage réel de la colonne de contenu par rapport à la fenêtre
+  // (plutôt que de le deviner avec calc(50% - 50vw), qui suppose à tort que
+  // #quarto-document-content est centré : ce n'est pas le cas quand la barre
+  // des catégories (#quarto-margin-sidebar) est affichée, à partir de 768px).
+  const contenu = document.getElementById("quarto-document-content");
+  if (!contenu) return;
+  const maj = () => {
+    const r = contenu.getBoundingClientRect();
+    const racine = document.documentElement;
+    racine.style.setProperty("--home-bleed-left", `${Math.max(0, r.left)}px`);
+    racine.style.setProperty("--home-bleed-right", `${Math.max(0, racine.clientWidth - r.right)}px`);
+  };
+  maj();
+  window.addEventListener("resize", maj);
+})();
+</script>
 <section id="sites" class="level2">
 <h2 class="anchored" data-anchor-id="sites">Sites</h2>
 <div id="listing-liste-sites" class="quarto-listing quarto-listing-container-grid">

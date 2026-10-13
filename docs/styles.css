@@ -1537,8 +1537,13 @@ body.page-resource #title-block-header {
   --home-line: var(--home-ink-a18);
   display: block;
   gap: 0;
-  width: 100vw;
-  margin-inline: calc(50% - 50vw);
+  /* Pleine largeur mesurée en JS (voir index.qmd) plutôt que calc(50% - 50vw) :
+     cette dernière suppose que #quarto-document-content est centré dans la
+     fenêtre, ce qui est faux dès que la barre latérale des catégories
+     (#quarto-margin-sidebar) est affichée (≥768px) — le contenu est alors
+     décalé vers la gauche et le calcul en vw rogne le texte sous overflow-x:hidden. */
+  margin-left: calc(-1 * var(--home-bleed-left, 0px));
+  margin-right: calc(-1 * var(--home-bleed-right, 0px));
   color: var(--home-text);
   background: var(--home-bg);
 }
