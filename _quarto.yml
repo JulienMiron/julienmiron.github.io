@@ -33,6 +33,8 @@ website:
             text: STT-1920
           - href: https://julienmiron.ca/STT-4300/
             text: STT-4300
+          - href: https://julienmiron.ca/STT-7360/
+            text: STT-7360
           - href: cours/STT-2902/STT-2902.qmd
             text: STT-2902
       - text: Outils

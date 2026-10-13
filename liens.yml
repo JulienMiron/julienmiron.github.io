@@ -21,6 +21,11 @@
   path: https://julienmiron.ca/STT-4300/
   categories: [Cours]
 
+- title: "Méthodes biostatistiques - STT-7360"
+  description: "Plan de cours, calendrier, devoirs, projet et études de cas du cours STT-7360."
+  path: https://julienmiron.ca/STT-7360/
+  categories: [Cours]
+
 - title: "Générateur de PDF d'examens"
   description: "Génère des PDF d'examens personnalisés avec nom, matricule et numéro de table pour chaque étudiant."
   path: apps/PDFExamens/index.html
