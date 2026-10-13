@@ -6,6 +6,7 @@ project:
     - "apps/PDFExamens/**"
     - "apps/PartageDMS/**"
     - "apps/GS-vers-Brio/**"
+    - "apps/shared/**"
 
 website:
   title: "Julien Miron"
