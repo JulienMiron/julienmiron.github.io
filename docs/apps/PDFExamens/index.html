@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../shared/site-navbar.css">
+    <script src="../shared/site-navbar.js" defer></script>
     <style>
 
         :root {
@@ -26,7 +28,6 @@
             --color-focus-ring: rgba(115, 80, 147, 0.2); /* halo autour d'un champ qui a le focus */
 
             /* Barre du haut (vert de la barre de navigation du site) */
-            --color-topbar: #0E9E6C;             /* fond de la barre du haut avec le logo */
 
             /* Fonds et surfaces */
             --color-page-bg: #f6f7f9;            /* fond de la page, fin du dégradé de l'en-tête, fond des blocs de code et des étiquettes « obligatoire / optionnel » */
@@ -85,41 +86,7 @@
             padding: 0 20px 40px;
         }
 
-        .app-topbar {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--color-topbar);
-            color: var(--color-on-primary);
-            margin: 0 -20px 28px;
-            padding: 12px 20px;
-        }
-
-        .app-topbar img {
-            height: 26px;
-            width: 26px;
-            border-radius: var(--radius-sm);
-        }
-
-        .app-topbar-brand {
-            color: var(--color-on-primary);
-            font-weight: 700;
-            text-decoration: none;
-            font-size: 15px;
-        }
-
-        .app-topbar-back {
-            margin-left: auto;
-            color: var(--color-on-primary);
-            text-decoration: none;
-            font-size: 13px;
-            opacity: 0.9;
-        }
-
-        .app-topbar-back:hover {
-            text-decoration: underline;
-            opacity: 1;
-        }
+        :root { --site-navbar-body-pad: 28px; }
 
         .container {
             background: transparent;
@@ -487,11 +454,6 @@
     </style>
 </head>
 <body>
-    <header class="app-topbar">
-        <img src="../../img/logo.png" alt="">
-        <a class="app-topbar-brand" href="../../index.html">Julien Miron</a>
-        <a class="app-topbar-back" href="../../index.html">← Retour au site</a>
-    </header>
     <div class="container">
         <div class="app-hero">
             <p class="app-eyebrow">Outil interne — Département de mathématiques et de statistique</p>

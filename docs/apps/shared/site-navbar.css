@@ -1,0 +1,285 @@
+/* Navbar du site (voir _quarto.yml, section website.navbar), reproduite pour les
+   apps autonomes qui ne chargent ni Bootstrap ni le JS de Quarto. Le balisage
+   est injecté par site-navbar.js. Tout est préfixé par .site-navbar pour ne pas
+   entrer en conflit avec les styles propres à chaque app. */
+:root {
+  --site-navbar-bg: #0E9E6C;
+  --site-navbar-h: 66px;   /* 62 px de barre + 4 px de bande inférieure */
+}
+
+/* La barre est fixe (comme sur le site) : on réserve sa hauteur en haut de la page. */
+body.has-site-navbar {
+  padding-top: calc(var(--site-navbar-h) + var(--site-navbar-body-pad, 0px)) !important;
+}
+
+.site-navbar,
+.site-navbar *,
+.site-navbar *::before,
+.site-navbar *::after {
+  box-sizing: border-box;
+}
+
+.site-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  min-height: var(--site-navbar-h);
+  background: var(--site-navbar-bg);
+  border-bottom: 4px solid #0d8e61;
+  color: #fff;
+  font-family: Helvetica, Arial, sans-serif;   /* hérité du body du site (styles.css) */
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.site-navbar a {
+  text-decoration: none;
+}
+
+.site-navbar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-navbar .site-navbar-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  min-height: calc(var(--site-navbar-h) - 4px);
+  padding: 0 .75rem 0 calc(1em + .75rem + 3px);
+}
+
+/* Logo + titre */
+.site-navbar .site-navbar-brand-container {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: .5em 1em .5em 0;
+  margin-right: auto;
+}
+
+.site-navbar .site-navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  padding: .3125rem 0;
+  color: #fff;
+  font-size: 1.25rem;
+  white-space: nowrap;
+}
+
+.site-navbar .site-navbar-brand:hover {
+  color: rgb(252.66, 253.85, 254.31);
+}
+
+.site-navbar .site-navbar-logo-link {
+  margin-right: 4px;
+}
+
+.site-navbar .site-navbar-logo {
+  display: block;
+  width: auto;
+  height: auto;
+  max-height: 24px;
+  padding-right: 4px;
+}
+
+.site-navbar .site-navbar-title {
+  font-size: 1.05em;
+  line-height: 1.1em;
+}
+
+/* Liens de navigation */
+.site-navbar .site-navbar-collapse {
+  display: flex;
+  align-items: center;
+  align-self: stretch;
+  flex-grow: 1;
+  order: 8;
+}
+
+.site-navbar .site-navbar-nav {
+  display: flex;
+  flex-direction: row;
+  align-self: stretch;
+  margin-right: auto;
+}
+
+.site-navbar .site-nav-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.site-navbar .site-nav-link {
+  display: flex;
+  align-items: center;
+  padding: .5rem .65rem;
+  color: #fff;
+  font-size: 1.0625rem;
+  cursor: pointer;
+}
+
+.site-navbar .site-nav-link:hover,
+.site-navbar .site-nav-link:focus-visible {
+  color: rgba(252.66, 253.85, 254.31, .8);
+}
+
+.site-navbar .site-nav-link.active {
+  color: rgb(252.66, 253.85, 254.31);
+}
+
+.site-navbar .site-dropdown-toggle::after {
+  display: inline-block;
+  margin-left: .6em;
+  vertical-align: .175em;
+  content: "";
+  border-top: .3em solid;
+  border-right: .3em solid transparent;
+  border-bottom: 0;
+  border-left: .3em solid transparent;
+  opacity: .75;
+}
+
+/* Menus déroulants */
+.site-navbar .site-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  min-width: 220px;
+  padding: .5rem 0;
+  margin: 0;
+  background: #fff;
+  color: #222;
+  font-size: .9rem;
+  text-align: left;
+  border: 1px solid rgba(0, 0, 0, .175);
+  border-radius: 0 0 .25rem .25rem;
+  box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.site-navbar .site-nav-item.show > .site-dropdown-menu {
+  display: block;
+}
+
+.site-navbar .site-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: .4rem .5rem;
+  color: #202124;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.site-navbar .site-dropdown-item:hover,
+.site-navbar .site-dropdown-item:focus-visible {
+  color: #202124;
+  background-color: #f6f7f9;
+}
+
+.site-navbar .site-dropdown-item[aria-current="page"] {
+  font-weight: 700;
+}
+
+/* Outils à droite */
+.site-navbar .site-navbar-tools {
+  display: flex;
+  align-items: center;
+  order: 900;
+  margin-left: .5em;
+}
+
+.site-navbar .site-navbar-tool {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 .25rem;
+  color: #fff;
+  font-size: 1.0625rem;
+}
+
+.site-navbar .site-navbar-tool:hover {
+  color: rgb(252.66, 253.85, 254.31);
+}
+
+.site-navbar .site-navbar-tool svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
+/* Bouton hamburger (petits écrans) */
+.site-navbar .site-navbar-toggler {
+  display: none;
+  order: 4;
+  padding: .25em 0;
+  color: #fff;
+  cursor: pointer;
+}
+
+.site-navbar .site-navbar-toggler svg {
+  display: block;
+  width: 1.5em;
+  height: 1.5em;
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+@media (max-width: 991.98px) {
+  .site-navbar .site-navbar-toggler {
+    display: block;
+  }
+
+  .site-navbar .site-navbar-collapse {
+    display: none;
+    flex-basis: 100%;
+    order: 1000;
+    padding-bottom: .5em;
+  }
+
+  .site-navbar.open .site-navbar-collapse {
+    display: block;
+  }
+
+  .site-navbar .site-navbar-nav {
+    flex-direction: column;
+  }
+
+  .site-navbar .site-dropdown-menu {
+    position: static;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: #fff;
+  }
+
+  .site-navbar .site-dropdown-item {
+    padding-left: 1.5rem;
+    color: #fff;
+  }
+
+  .site-navbar .site-dropdown-item:hover,
+  .site-navbar .site-dropdown-item:focus-visible {
+    color: rgba(252.66, 253.85, 254.31, .8);
+    background: transparent;
+  }
+}
+
+@media (max-width: 700px) {
+  .site-navbar .site-navbar-brand {
+    max-width: calc(100vw - 10rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: .95rem;
+  }
+}
