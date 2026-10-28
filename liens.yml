@@ -40,3 +40,8 @@
   description: "Convertit un fichier de notes GradeScope en format CorrectionOptique pour BRIO."
   path: apps/GS-vers-Brio/index.html
   categories: [Outils]
+
+- title: "Fiches de reprise facultaire"
+  description: "Prépare la fiche « Reprise d'examen facultaire » de la FSG pour chaque étudiant, à partir du CSV des reprises."
+  path: apps/RepriseFacultaire/index.html
+  categories: [Outils]

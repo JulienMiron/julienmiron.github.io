@@ -22,7 +22,8 @@
     { text: "Outils", items: [
       { text: "Générateur de PDF d’examens", href: "apps/PDFExamens/index.html" },
       { text: "Partage DMS", href: "apps/PartageDMS/index.html" },
-      { text: "GS vers Brio", href: "apps/GS-vers-Brio/index.html" }
+      { text: "GS vers Brio", href: "apps/GS-vers-Brio/index.html" },
+      { text: "Fiches de reprise facultaire", href: "apps/RepriseFacultaire/index.html" }
     ] },
     { text: "Sites", href: "index.html#sites" },
     { text: "Dépôts", href: "index.html#depots" },

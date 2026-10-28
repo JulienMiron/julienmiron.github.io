@@ -6,6 +6,7 @@ project:
     - "apps/PDFExamens/**"
     - "apps/PartageDMS/**"
     - "apps/GS-vers-Brio/**"
+    - "apps/RepriseFacultaire/**"
     - "apps/shared/**"
 
 website:
@@ -45,6 +46,8 @@ website:
             text: Partage DMS
           - href: apps/GS-vers-Brio/index.html
             text: GS vers Brio
+          - href: apps/RepriseFacultaire/index.html
+            text: Fiches de reprise facultaire
       - href: index.qmd#sites
         text: Sites
       - href: index.qmd#depots
