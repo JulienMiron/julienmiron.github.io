@@ -261,7 +261,8 @@
         ['cahier', 'Cahier d’examen (cahier bleu)'],
         ['formules', 'Feuille de formules'],
         ['enonce', 'Énoncé d’examen'],
-        ['notesfournie', 'Feuille de notes fournie']
+        ['notesfournie', 'Feuille de notes fournie'],
+        ['tables', 'Table de lois']   // pas de case sur le formulaire : imprimée dans « Autre »
     ];
     // Champs du gabarit PDF (nom normalisé du champ AcroForm)
     const PDF_TEXT = {
@@ -458,7 +459,7 @@
             sigleTitre: 'STT-1900 – Méthodes statistiques pour l’ingénierie',
             heures: '2', minutes: '50', calc: 'oui',
             docs: ['recto'],
-            env: ['enonce', 'autre'], autreEnv: 'Table de lois'
+            env: ['enonce', 'tables']
         }
     };
     function defaultSettings(s) {
@@ -467,7 +468,16 @@
         return Object.assign({
             sigleTitre: [s.cours, titre].filter(Boolean).join(' – '),
             heures: '', minutes: '', calc: '', docs: [], autreDoc: '', env: [], autreEnv: '', consignes: ''
-        }, JSON.parse(JSON.stringify(COURSE_DEFAULTS[s.cours] || {})), saved);
+        }, JSON.parse(JSON.stringify(COURSE_DEFAULTS[s.cours] || {})), migrate(saved));
+    }
+    // Anciens réglages : « Autre : Table de lois » devient la case « Table de lois ».
+    function migrate(saved) {
+        const c = JSON.parse(JSON.stringify(saved));
+        if (Array.isArray(c.env) && c.env.includes('autre') && /^tables? de lois$/i.test((c.autreEnv || '').trim())) {
+            c.env = c.env.filter((x) => x !== 'autre').concat('tables');
+            c.autreEnv = '';
+        }
+        return c;
     }
     function checkList(prefix, items, chosen, autreVal, autreKey) {
         return items.map(([k, label]) => `
@@ -630,8 +640,12 @@
             if (c.calc === 'non') check('non');
             (c.docs || []).forEach((d) => check(PDF_CHECK_DOCS[d]));
             if ((c.docs || []).includes('autre')) text(PDF_TEXT.autreDoc, c.autreDoc);
-            (c.env || []).forEach((d) => check(PDF_CHECK_ENV[d]));
-            if ((c.env || []).includes('autre')) text(PDF_TEXT.autreEnv, c.autreEnv);
+            // « Table de lois » n'a pas de case sur le formulaire : on coche « Autre » et on l'écrit.
+            const env = c.env || [];
+            const autresEnv = [env.includes('tables') ? 'Table de lois' : '', env.includes('autre') ? c.autreEnv : '']
+                .map((x) => (x || '').trim()).filter(Boolean);
+            env.filter((d) => d !== 'tables' && d !== 'autre').forEach((d) => check(PDF_CHECK_ENV[d]));
+            if (env.includes('tables') || env.includes('autre')) { check(PDF_CHECK_ENV.autre); text(PDF_TEXT.autreEnv, autresEnv.join(', ')); }
             text(PDF_TEXT.consignes, c.consignes);
             text(PDF_TEXT.contact, contact.nom);
             if (contact.teams) check('teams');
