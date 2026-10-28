@@ -135,4 +135,4 @@ Chargement des dépôts…
 
 ------------------------------------------------------------------------
 
-Une question ou une erreur à signaler ? [Ouvrez une issue sur GitHub](https://github.com/JulienMiron/SitePerso/issues).
+Une question ou une erreur à signaler ? [Ouvrez une issue sur GitHub](https://github.com/JulienMiron/julienmiron.github.io/issues).

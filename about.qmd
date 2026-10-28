@@ -11,4 +11,4 @@ Ce site regroupe le matériel de cours, les applications interactives et les dé
 - Courriel : [julien.miron@mat.ulaval.ca](mailto:julien.miron@mat.ulaval.ca)
 - GitHub : [github.com/JulienMiron](https://github.com/JulienMiron)
 
-Une erreur à signaler sur ce site ? [Ouvrez une issue sur GitHub](https://github.com/JulienMiron/SitePerso/issues).
+Une erreur à signaler sur ce site ? [Ouvrez une issue sur GitHub](https://github.com/JulienMiron/julienmiron.github.io/issues).
