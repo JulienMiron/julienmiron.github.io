@@ -35,6 +35,11 @@
             --cat-salles: #5c6bc0;               /* Salles */
             --cat-infos: #5f6368;                /* Informations générales */
 
+            /* Types de reprise (tableau des reprises) */
+            --rep-fac: #c62828;                  /* Reprise facultaire */
+            --rep-dms: #315f8c;                  /* Reprise DMS */
+            --rep-sse: #007c89;                  /* Centre du SSE (hors campus) */
+
             /* Pastilles de type de fichier */
             --type-pdf: #c62828;                 /* PDF */
             --type-doc: #2b579a;                 /* Word */
@@ -134,6 +139,7 @@
         }
         .card:hover { box-shadow: var(--shadow-md); }
         .card.wide { grid-column: 1 / -1; }
+        .card { min-width: 0; }
         .card-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px 6px; }
         .card-icon {
             width: 34px; height: 34px; border-radius: 8px; flex: none;
@@ -202,6 +208,34 @@
         .room-name { font-weight: 600; }
         .room-cap { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 
+
+        /* Tableau des reprises */
+        .table-wrap { overflow-x: auto; margin: 4px 0 6px; }
+        table.reprises { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; min-width: 720px; }
+        table.reprises th, table.reprises td { padding: 9px 10px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-border); }
+        table.reprises thead th { font-size: 13px; background: color-mix(in srgb, var(--cat-reprises) 7%, white); border-bottom: 2px solid color-mix(in srgb, var(--cat-reprises) 35%, white); white-space: nowrap; }
+        table.reprises thead th:first-child { border-top-left-radius: var(--radius-sm); }
+        table.reprises thead th:last-child { border-top-right-radius: var(--radius-sm); }
+        table.reprises .rj { display: block; font-size: 11px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .04em; }
+        table.reprises .rnote { display: block; font-size: 11px; font-weight: 700; color: var(--rep-dms); }
+        table.reprises th.rgroup { font-size: 13px; width: 150px; color: var(--color-text); }
+        table.reprises tbody tr:last-child > * { border-bottom: none; }
+        table.reprises .rlocal { display: block; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+        table.reprises .rtodo { color: var(--color-text-faint); font-style: italic; }
+        table.reprises td.rsse { color: var(--color-text-muted); }
+        table.reprises .passe { opacity: .45; }
+        table.reprises th.prochaine { box-shadow: inset 0 3px 0 var(--soon); }
+        table.reprises th .tag { display: block; font-size: 11px; font-weight: 700; color: var(--soon); text-transform: none; }
+        table.reprises th.passe .tag { color: var(--color-text-faint); font-weight: 400; }
+        .rtype { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill); white-space: nowrap; }
+        .t-fac { color: var(--rep-fac); background: color-mix(in srgb, var(--rep-fac) 11%, white); }
+        .t-dms { color: var(--rep-dms); background: color-mix(in srgb, var(--rep-dms) 11%, white); }
+        .t-sse { color: var(--rep-sse); background: color-mix(in srgb, var(--rep-sse) 11%, white); }
+        .howto { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 14px; }
+        .howto-col { border: 1px solid var(--color-border); border-left: 4px solid var(--h); border-radius: var(--radius-sm); padding: 10px 12px 4px; }
+        .howto-col h3 { font-size: 13.5px; margin: 0 0 4px; padding: 0; border: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--color-text); }
+        .howto-col .tips li { font-size: 13.5px; }
+
         /* Recherche : masquage et surlignage */
         .is-hidden { display: none !important; }
         mark { background: var(--color-highlight); color: inherit; border-radius: 2px; padding: 0 1px; }
@@ -256,6 +290,59 @@
     <main class="container">
         <div class="grid" id="grille">
 
+            <!-- Reprises -->
+            <section class="card wide" data-cat="reprises" style="--c: var(--cat-reprises)">
+                <div class="card-header">
+                    <div class="card-icon" aria-hidden="true">🔁</div>
+                    <div><h2>Reprises d'examen — automne 2026</h2><p class="card-sub">Séances, locaux et marche à suivre selon le groupe · toutes les séances commencent à 9 h</p></div>
+                </div>
+                <div class="card-body">
+                    <div class="table-wrap">
+                        <table class="reprises" data-label="Reprise d'examen">
+                            <thead>
+                                <tr><th scope="col" class="rgroup-head">Groupe</th><th scope="col" data-date="2026-10-29"><span class="rj">Jeudi</span> 29 octobre</th><th scope="col" data-date="2026-11-07"><span class="rj">Samedi</span> 7 novembre</th><th scope="col" data-date="2026-12-17"><span class="rj">Jeudi</span> 17 décembre</th><th scope="col" data-date="2027-01-07"><span class="rj">Jeudi</span> 7 janvier 2027<span class="rnote">Séance DMS</span></th><th scope="col" data-date="2027-01-16"><span class="rj">Samedi</span> 16 janvier 2027</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><th scope="row" class="rgroup">Groupe régulier</th><td><span class="rtype t-fac">Reprise facultaire</span><span class="rlocal">VCH-2850</span></td><td><span class="rtype t-fac">Reprise facultaire</span><span class="rlocal">VCH-3880</span></td><td><span class="rtype t-fac">Reprise facultaire</span><span class="rlocal">VCH-3880</span></td><td><span class="rtype t-dms">Reprise DMS</span><span class="rlocal">VCH-0602</span></td><td><span class="rtype t-fac">Reprise facultaire</span><span class="rlocal">VCH-3880</span></td></tr>
+                                <tr><th scope="row" class="rgroup">Mesures d'accommodement</th><td><span class="rtype t-dms">Reprise DMS</span><span class="rlocal">VCH-3850</span></td><td><span class="rtype t-dms">Reprise DMS</span><span class="rlocal">VCH-3850</span></td><td><span class="rtype t-dms">Reprise DMS</span><span class="rlocal">VCH-3850</span></td><td><span class="rtype t-dms">Reprise DMS</span><span class="rlocal">VCH-0602</span></td><td><span class="rtodo">À revoir si nécessaire</span></td></tr>
+                                <tr><th scope="row" class="rgroup">Hors campus (SSE)</th><td colspan="5" class="rsse">Le SSE planifie la reprise dans un de ses centres d'examens et confirme la date et le lieu à l'enseignant et à la personne étudiante. Voir la marche à suivre ci-dessous.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="howto">
+                        <div class="howto-col" style="--h: var(--rep-fac)">
+                            <h3><span class="rtype t-fac">Reprise facultaire</span> Groupe régulier</h3>
+                            <ul class="tips">
+                                <li>Choisir la séance avec les boutons du courriel automatique de la FSG (« Demande de reprise d'examen autorisée »).</li>
+                                <li>Suivre ensuite les directives des courriels de la FSG et du secrétariat : local, date limite de dépôt de l'examen (avant 16 h).</li>
+                                <li>L'heure exacte est confirmée à la personne étudiante 2 jours avant la reprise.</li>
+                                <li>Copies à récupérer le lendemain de la reprise, dès 8 h 30, au VCH-1033.</li>
+                            </ul>
+                        </div>
+                        <div class="howto-col" style="--h: var(--rep-dms)">
+                            <h3><span class="rtype t-dms">Reprise DMS</span> Accommodements · 7 janvier</h3>
+                            <ul class="tips">
+                                <li>Envoyer l'énoncé et les consignes complètes pour le surveillant à <a href="mailto:examens@mat.ulaval.ca">examens@mat.ulaval.ca</a>, au plus tard 2 jours avant la séance (ex. le 27 octobre pour le 29 octobre).</li>
+                                <li>Utiliser le <a data-glob="Documents/Tableau reprises DMS/*.docx" href="Documents/Tableau%20reprises%20DMS/Tableau%20%C3%A0%20compl%C3%A9ter%20-%20reprise%20d%27examen%20DMS%20-%20Gabarit.docx" target="_blank">tableau à remplir (gabarit Word)</a> pour les consignes.</li>
+                                <li>Une personne étudiante qui a deux examens le même jour peut faire le second en après-midi : aviser le DMS à l'avance.</li>
+                                <li>Le 7 janvier, la séance est organisée par le DMS pour tous les groupes (VCH-0602).</li>
+                            </ul>
+                        </div>
+                        <div class="howto-col" style="--h: var(--rep-sse)">
+                            <h3><span class="rtype t-sse">SSE</span> Hors campus</h3>
+                            <ul class="tips">
+                                <li>Écrire dès que possible à <a href="mailto:sse.examens@ulaval.ca">sse.examens@ulaval.ca</a> avec le nom de la personne étudiante, l'examen à imprimer et les consignes d'impression (recto, aide-mémoire ou tables).</li>
+                                <li>Le SSE confirme la date et le centre d'examens, et avise lui-même la personne étudiante.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <p class="field-help">Inscrire deux dates au plan de cours (une à la mi-session, une en fin de session); toutes les séances restent utilisables. Sources : courriels de la FSG (28 août 2026) et du DMS (28 août et 14 octobre 2026).</p>
+                </div>
+            </section>
+
+
             <!-- Examens -->
             <section class="card" data-cat="examens" style="--c: var(--cat-examens)">
                 <div class="card-header">
@@ -268,30 +355,6 @@
                         <li><a data-glob="Documents/Calendrier examens SSE/*.pdf" href="Documents/Calendrier%20examens%20SSE/calendrier-SSE-A26.pdf" target="_blank"><span class="link-label">Calendrier des examens du SSE</span></a></li>
                         <li><a data-glob="Documents/Consignes surveillants/*.pdf" href="Documents/Consignes%20surveillants/Consigne%20pour%20les%20surveillants.pdf" target="_blank"><span class="link-label">Consignes pour les surveillants</span></a></li>
                     </ul>
-                </div>
-            </section>
-
-            <!-- Reprises -->
-            <section class="card" data-cat="reprises" style="--c: var(--cat-reprises)">
-                <div class="card-header">
-                    <div class="card-icon" aria-hidden="true">🔁</div>
-                    <div><h2>Reprises d'examen</h2><p class="card-sub">Séances de la FSG et du DMS</p></div>
-                </div>
-                <div class="card-body">
-                    <ul class="link-list">
-                        <li><a data-glob="Documents/Informations reprises DMS/*.pdf" href="Documents/Informations%20reprises%20DMS/Informations_reprises_DMS.pdf" target="_blank"><span class="link-label">Informations sur les reprises DMS</span></a></li>
-                        <li><a data-glob="Documents/Tableau reprises DMS/*.docx" href="Documents/Tableau%20reprises%20DMS/Tableau%20%C3%A0%20compl%C3%A9ter%20-%20reprise%20d%27examen%20DMS%20-%20Gabarit.docx" target="_blank"><span class="link-label">Tableau à remplir reprises DMS</span></a></li>
-                    </ul>
-
-                    <p class="info-label">Dates des reprises FSG</p>
-                    <ul class="date-list" data-label="Reprise d'examen">
-                        <li data-date="2026-10-29"><span class="d">Jeudi 29 octobre 2026</span></li>
-                        <li data-date="2026-11-07"><span class="d">Samedi 7 novembre 2026</span></li>
-                        <li data-date="2026-12-17"><span class="d">Jeudi 17 décembre 2026</span></li>
-                        <li data-date="2027-01-07"><span class="d">Jeudi 7 janvier 2027 <span class="k">· DMS, groupe avec mesures d'accommodement</span></span></li>
-                        <li data-date="2027-01-16"><span class="d">Samedi 16 janvier 2027</span></li>
-                    </ul>
-                    <p class="field-help">Début des reprises : 9 h. Si la personne étudiante a deux examens le même jour, le second peut être planifié en après-midi en avisant le DMS à l'avance. Inscrire deux dates au plan de cours (une à la mi-session, une en fin de session); toutes les séances restent utilisables.</p>
                 </div>
             </section>
 
@@ -523,6 +586,27 @@
             });
         });
 
+        document.querySelectorAll("table.reprises").forEach(function (t) {
+            var carte = t.closest(".card"), premiere = true;
+            var ths = t.querySelectorAll("thead th[data-date]");
+            ths.forEach(function (th, i) {
+                var d = parse(th.dataset.date);
+                var n = Math.round((d - auj) / JOUR);
+                var tag = document.createElement("span");
+                tag.className = "tag";
+                var col = [th].concat(Array.prototype.slice.call(t.querySelectorAll("tbody tr")).map(function (tr) {
+                    return tr.children[i + 1];
+                }).filter(function (c) { return c && !c.hasAttribute("colspan"); }));
+                if (n < 0) { col.forEach(function (c) { c.classList.add("passe"); }); tag.textContent = "passée"; }
+                else {
+                    tag.textContent = dans(n);
+                    if (premiere) { th.classList.add("prochaine"); premiere = false; }
+                    aVenir.push({ n: n, d: d, quoi: t.dataset.label, c: getComputedStyle(carte).getPropertyValue("--c") });
+                }
+                th.appendChild(tag);
+            });
+        });
+
         var liste = document.getElementById("liste-echeances");
         aVenir.sort(function (a, b) { return a.n - b.n; }).slice(0, 4).forEach(function (e) {
             var li = document.createElement("li");
@@ -548,7 +632,7 @@
         function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
 
         /* Garde le texte d'origine de chaque élément cherchable, pour retirer le surlignage. */
-        var items = document.querySelectorAll(".link-label, .date-list li > .d, .tips li, .room-name, .card h2");
+        var items = document.querySelectorAll(".link-label, .date-list li > .d, .tips li, .room-name, .card h2, table.reprises td, table.reprises th.rgroup");
         items.forEach(function (el) { el.dataset.orig = el.innerHTML; });
 
         function surligner(el, mots) {
@@ -590,7 +674,7 @@
                 var okCat = filtre === "tout" || carte.dataset.cat === filtre;
                 var titre = norm(carte.querySelector(".card-header").textContent);
                 var titreOk = mots.length && mots.every(function (m) { return titre.indexOf(m) !== -1; });
-                var lignes = carte.querySelectorAll(".link-list li, .date-list li, .tips li, .room");
+                var lignes = carte.querySelectorAll(".link-list li, .date-list li, .tips li, .room, table.reprises tbody tr");
                 var nb = 0;
                 lignes.forEach(function (li) {
                     var t = norm(li.textContent);
@@ -601,6 +685,9 @@
                 });
                 carte.querySelectorAll(".info-label, .field-help").forEach(function (el) {
                     el.classList.toggle("is-hidden", mots.length > 0 && !titreOk);
+                });
+                carte.querySelectorAll(".howto-col").forEach(function (col) {
+                    col.classList.toggle("is-hidden", !col.querySelector("li:not(.is-hidden)"));
                 });
                 carte.querySelectorAll(".room-cols > div").forEach(function (col) {
                     col.classList.toggle("is-hidden", !col.querySelector(".room:not(.is-hidden)"));
