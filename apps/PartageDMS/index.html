@@ -6,81 +6,57 @@
     <title>Partage de documents DMS</title>
     <link rel="icon" href="../../img/logo.png">
     <link rel="stylesheet" href="../../styles.css">
-    <!-- Bibliothèques à version fixe, avec empreinte d'intégrité : le navigateur refuse tout script modifié -->
-    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js" integrity="sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../shared/site-navbar.css">
     <script src="../shared/site-navbar.js" defer></script>
     <style>
-
         :root {
             /* ===== Couleurs : modifier ici pour changer toute la page ===== */
+            --color-primary: #9467bd;            /* violet du site : surtitre, bande de l'en-tête, liens, puce active, focus du champ de recherche */
+            --color-primary-dark: #735093;       /* survol des liens, texte des pastilles de type « Lien » */
+            --color-primary-bg: #f5f1fa;         /* fond de l'en-tête (début du dégradé), pastilles « Lien », survol des lignes de liens */
+            --color-primary-border: #d9c9e8;     /* bordure des cartes au survol, du champ de recherche */
+            --color-focus-ring: rgba(115, 80, 147, 0.2); /* halo autour du champ de recherche et des puces qui ont le focus */
 
-            /* Couleur principale (violet de julienmiron.github.io) */
-            --color-primary: #9467bd;            /* boutons, bordure des champs (y compris les champs nombre des options) et de la zone de dépôt, icône « i », numéros d'étape, bande du guide et de l'en-tête, surtitre de l'en-tête, texte des étiquettes « obligatoire / optionnel », début de la barre de progression */
-            --color-primary-dark: #735093;       /* survol et focus des champs et de l'icône « i », zone de dépôt survolée, noms des locaux, titre du volet des colonnes, texte des badges « fichier », en-têtes du tableau NRC, fin de la barre de progression */
-            --color-primary-bg-subtle: #faf8fc;  /* fond du volet « Vérifier / choisir les colonnes » et du menu « Un dossier / Un fichier » */
-            --color-primary-bg: #f5f1fa;         /* fond des champs, de la zone de dépôt, des cartes de locaux, du bloc de placement manuel, des en-têtes du tableau NRC, début du dégradé de l'en-tête */
-            --color-primary-bg-hover: #ece2f4;   /* fond des champs et de la zone de dépôt au survol, en-têtes du tableau de placement manuel, fond des badges « fichier » */
-            --color-primary-border: #d9c9e8;     /* bordure des cartes de locaux, du volet des colonnes, du menu dossier/fichier, du bloc de placement manuel et de ses en-têtes */
-            --color-focus-ring: rgba(115, 80, 147, 0.2); /* halo autour d'un champ qui a le focus */
+            --color-page-bg: #f6f7f9;            /* fond de la page */
+            --color-surface: #ffffff;            /* fond des cartes, du champ de recherche, des tuiles d'échéance */
+            --color-text: #202124;               /* texte principal, titres */
+            --color-text-muted: #5f6368;         /* textes d'aide, dates passées, sous-titres */
+            --color-text-faint: #8a8f96;         /* compteurs, mentions « passée » */
+            --color-border: #e1e3e8;             /* bordures des cartes, séparateurs des listes */
+            --color-highlight: #fff3b0;          /* surlignage des mots trouvés par la recherche */
 
-            /* Barre du haut (vert de la barre de navigation du site) */
+            /* Couleurs des catégories (bande du haut des cartes, icône, puce de filtre) */
+            --cat-examens: #c62828;              /* Examens */
+            --cat-reprises: #b26a00;             /* Reprises */
+            --cat-guides: #315f8c;               /* Guides et politiques */
+            --cat-aux: #0e9e6c;                  /* Auxiliaires */
+            --cat-copies: #007c89;               /* Copies d'examen */
+            --cat-session: #9467bd;              /* Calendrier de la session */
+            --cat-salles: #5c6bc0;               /* Salles */
+            --cat-infos: #5f6368;                /* Informations générales */
 
-            /* Fonds et surfaces */
-            --color-page-bg: #f6f7f9;            /* fond de la page, fin du dégradé de l'en-tête, fond des blocs de code et des étiquettes « obligatoire / optionnel » */
-            --color-surface: #ffffff;            /* fond des cartes d'étape, du guide, des infobulles (et leur pointe), milieu du dégradé de l'en-tête */
-            --color-on-primary: #ffffff;         /* texte sur fond coloré : barre du haut, boutons, barre de progression, icône « i », numéros d'étape */
-            --color-progress-track: #f0f0f0;     /* fond vide de la barre de progression */
+            /* Pastilles de type de fichier */
+            --type-pdf: #c62828;                 /* PDF */
+            --type-doc: #2b579a;                 /* Word */
+            --type-tex: #007c89;                 /* LaTeX */
 
-            /* Texte */
-            --color-text: #202124;               /* texte principal, titres, texte saisi dans les champs, infobulles, état des fichiers, contenu du volet des colonnes, messages d'état */
-            --color-text-secondary: #555555;     /* libellés des champs, titres des fichiers dans le volet des colonnes, titre du placement manuel */
-            --color-text-muted: #666666;         /* sous-titre, descriptions d'étape, textes d'aide, texte du guide, indication du volet des colonnes, capacités des locaux, texte sous la barre de progression, messages informatifs */
-            --color-text-faint: #888888;         /* texte d'invite de la zone de dépôt, note du menu dossier/fichier, effectifs et feuilles du tableau NRC, fichiers optionnels absents */
+            /* Échéances */
+            --soon: #b26a00;                     /* échéance dans 7 jours ou moins */
+            --soon-bg: #fff6e5;                  /* fond de la tuile d'une échéance proche */
 
-            /* Bordures et séparateurs */
-            --color-border: #d9d9d9;             /* bordure des cartes d'étape, du guide, des étiquettes, des infobulles (et leur pointe), du champ « Autre local » */
-            --color-divider: #e4dced;            /* lignes de séparation des tableaux NRC et de placement manuel, sous le titre du volet des colonnes */
-            --color-disabled: #cccccc;           /* fond et bordure des boutons désactivés */
-
-            /* États */
-            --color-success: #28a745;            /* fichier trouvé (✅) dans l'état des fichiers */
-            --color-warning: #b26a00;            /* avertissements : fichiers ignorés ou en double, notes du déroulement Brio, détection du nom et du sigle */
-            --color-danger: #c62828;             /* fichier obligatoire manquant (❌), capacité de local à saisir, bouton × de retrait d'un local */
-            --color-danger-dark: #8e1b1b;        /* bouton × de retrait d'un local au survol */
-
-            /* Ombres */
-            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);      /* cartes d'étape et guide */
-            --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.18); /* infobulles */
-
-            /* Couleurs d'impression des PDF générés (lues par le script, format #rrggbb) */
-            --pdf-text: #000000;                 /* texte imprimé : nom, NI, place et local sur la page couverture ; titre, en-têtes et lignes des listes de présence */
-            --pdf-header-bg: #d9d9d9;            /* fond de la ligne d'en-tête des listes de présence */
-            --pdf-row-alt-bg: #f2f2ff;           /* fond d'une ligne sur deux des listes de présence */
-            --pdf-checkbox-border: #000000;      /* contour des cases à cocher des listes de présence */
-            --pdf-checkbox-bg: #ffffff;          /* intérieur des cases à cocher des listes de présence */
-            --pdf-row-line: #cccccc;             /* lignes horizontales entre les étudiants des listes de présence */
-            --pdf-column-line: #999999;          /* lignes verticales entre les colonnes des listes de présence */
-            --pdf-table-border: #666666;         /* contour extérieur du tableau des listes de présence */
-
-            /* ===== Arrondis ===== */
-            --radius: 4px;      /* conteneurs, champs, boutons */
-            --radius-sm: 4px;   /* petits éléments : code, logo, petits champs */
-            --radius-pill: 999px; /* pastilles : badges, barre de progression */
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);    /* cartes au repos */
+            --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.08);   /* cartes au survol */
+            --radius: 10px;                      /* cartes, champ de recherche */
+            --radius-sm: 6px;                    /* lignes, tuiles */
+            --radius-pill: 999px;                /* puces, pastilles */
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: Helvetica, Arial, sans-serif;
             color: var(--color-text);
-            line-height: 1.6;
+            line-height: 1.5;
             background: var(--color-page-bg);
             min-height: 100vh;
             padding: 0 20px 40px;
@@ -88,475 +64,262 @@
 
         :root { --site-navbar-body-pad: 28px; }
 
-        .container {
-            background: transparent;
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
 
-        h1 {
-            color: var(--color-text);
-            margin: 0.2rem 0 0.6rem;
-            font-size: 26px;
-        }
-
-        .subtitle {
-            color: var(--color-text-muted);
-            font-size: 1.05rem;
-            max-width: 70ch;
-            margin-bottom: 0;
-        }
-
+        /* ===== En-tête ===== */
         .app-hero {
             border-left: 6px solid var(--color-primary);
             background: linear-gradient(90deg, var(--color-primary-bg) 0%, var(--color-surface) 55%, var(--color-page-bg) 100%);
-            padding: 1.3rem 1.5rem;
-            margin: 1rem 0 1.5rem;
+            padding: 1.3rem 1.5rem 1.4rem;
+            margin: 1rem 0 1.25rem;
             border-radius: 0 var(--radius) var(--radius) 0;
         }
-
         .app-eyebrow {
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--color-primary);
-            font-size: 0.78rem;
-            font-weight: 700;
-            margin: 0 0 0.35rem;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--color-primary); font-size: 0.78rem; font-weight: 700;
+            margin-bottom: 0.35rem;
         }
+        h1 { font-size: 26px; margin-bottom: 0.25rem; }
+        .subtitle { color: var(--color-text-muted); font-size: 0.98rem; }
 
-        .upload-section {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            color: var(--color-text-secondary);
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 12px;
-            border: 2px dashed var(--color-primary);
-            border-radius: var(--radius);
-            background: var(--color-primary-bg);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        input[type="file"]:hover {
-            border-color: var(--color-primary-dark);
-            background: var(--color-primary-bg-hover);
-        }
-
-        button {
-            width: 100%;
-            padding: 13px;
-            background: var(--color-primary);
-            color: var(--color-on-primary);
-            border: 1px solid var(--color-primary);
-            border-radius: var(--radius);
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: filter 0.15s ease;
-            margin-top: 20px;
-        }
-
-        button:hover:not(:disabled) {
-            filter: brightness(0.95);
-        }
-
-        button:disabled {
-            background: var(--color-disabled);
-            border-color: var(--color-disabled);
-            cursor: not-allowed;
-        }
-
-        .progress {
-            margin-top: 20px;
-            display: none;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 30px;
-            background: var(--color-progress-track);
-            border-radius: var(--radius-pill);
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-            width: 0%;
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--color-on-primary);
-            font-weight: 600;
-            font-size: 12px;
-        }
-
-        .progress-text {
-            text-align: center;
-            color: var(--color-text-muted);
-            font-size: 14px;
-        }
-
-        select, input[type="text"], textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid var(--color-primary);
-            border-radius: var(--radius);
-            background: var(--color-primary-bg);
-            font-size: 14px;
-            color: var(--color-text);
-            transition: all 0.3s ease;
-            appearance: auto;
-        }
-
-        select:hover, input[type="text"]:hover, textarea:hover {
-            border-color: var(--color-primary-dark);
-            background: var(--color-primary-bg-hover);
-        }
-
-        select:focus, input[type="text"]:focus, textarea:focus {
-            outline: none;
-            border-color: var(--color-primary-dark);
-            box-shadow: 0 0 0 3px var(--color-focus-ring);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .info-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--color-primary);
-            color: var(--color-on-primary);
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-left: 6px;
-            vertical-align: middle;
-            position: relative;
-            user-select: none;
-            line-height: 1;
-        }
-
-        .info-icon:hover {
-            background: var(--color-primary-dark);
-        }
-
-        .info-bubble {
-            display: none;
-            position: absolute;
-            top: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
+        /* ===== Recherche et filtres ===== */
+        .search-row { display: flex; gap: 10px; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+        .search-box { position: relative; flex: 1; min-width: 240px; }
+        .search-box svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--color-text-muted); pointer-events: none; }
+        #recherche {
+            width: 100%; font: inherit; font-size: 15px;
+            padding: 11px 70px 11px 40px;
+            border: 1px solid var(--color-primary-border); border-radius: var(--radius);
             background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-popover);
-            padding: 14px 16px;
-            font-size: 13px;
-            font-weight: 400;
-            color: var(--color-text);
-            line-height: 1.5;
-            z-index: 100;
-            text-align: left;
         }
-
-        .info-bubble::before {
-            content: '';
-            position: absolute;
-            top: -7px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-left: 7px solid transparent;
-            border-right: 7px solid transparent;
-            border-bottom: 7px solid var(--color-border);
+        #recherche:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+        .search-box kbd {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            font: 12px/1 Helvetica, Arial, sans-serif; color: var(--color-text-faint);
+            border: 1px solid var(--color-border); border-radius: 4px; padding: 3px 6px; background: var(--color-page-bg);
         }
-
-        .info-bubble::after {
-            content: '';
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-bottom: 6px solid var(--color-surface);
+        .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+        .chip {
+            font: inherit; font-size: 13px; cursor: pointer;
+            padding: 5px 12px; border-radius: var(--radius-pill);
+            border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text);
+            display: inline-flex; align-items: center; gap: 6px;
         }
+        .chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--color-primary)); }
+        .chip:hover { border-color: var(--c, var(--color-primary)); }
+        .chip:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--color-focus-ring); }
+        .chip[aria-pressed="true"] { background: var(--c, var(--color-primary)); border-color: var(--c, var(--color-primary)); color: #fff; }
+        .chip[aria-pressed="true"] .dot { background: #fff; }
 
-        .info-bubble.show {
-            display: block;
+        /* ===== Prochaines échéances ===== */
+        .upcoming { margin-bottom: 1.25rem; }
+        .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-muted); margin-bottom: 8px; }
+        .upcoming-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; list-style: none; }
+        .upcoming-item {
+            background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+            padding: 10px 12px; border-left: 4px solid var(--c, var(--color-primary));
         }
+        .upcoming-item.soon { background: var(--soon-bg); }
+        .upcoming-when { font-size: 12px; font-weight: 700; color: var(--color-text-muted); }
+        .upcoming-item.soon .upcoming-when { color: var(--soon); }
+        .upcoming-what { font-size: 14px; font-weight: 600; margin-top: 2px; }
+        .upcoming-date { font-size: 12.5px; color: var(--color-text-muted); }
 
-        .subtitle {
-            display: block;
+        /* ===== Grille de cartes ===== */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 16px; align-items: start; }
+        .card {
+            background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius);
+            box-shadow: var(--shadow-sm); border-top: 4px solid var(--c);
+            transition: box-shadow .15s, border-color .15s;
         }
-
-        .intro-guide {
-            border: 1px solid var(--color-border);
-            border-left: 5px solid var(--color-primary);
-            border-radius: 0 var(--radius) var(--radius) 0;
-            background: var(--color-surface);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 25px;
-            overflow: hidden;
+        .card:hover { box-shadow: var(--shadow-md); }
+        .card.wide { grid-column: 1 / -1; }
+        .card-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px 6px; }
+        .card-icon {
+            width: 34px; height: 34px; border-radius: 8px; flex: none;
+            display: grid; place-items: center; font-size: 18px;
+            background: color-mix(in srgb, var(--c) 12%, white);
         }
+        .card h2 { font-size: 17px; line-height: 1.25; margin: 0; padding: 0; border: none; color: var(--color-text); }
+        .room-cols h3 { border: none; padding: 0; }
+        h1 { border: none; }
+        .card-sub { font-size: 12.5px; color: var(--color-text-muted); }
+        .card-body { padding: 4px 16px 14px; }
 
-        .intro-guide summary {
-            cursor: pointer;
-            padding: 14px 16px;
-            font-weight: 700;
-            color: var(--color-text);
-            list-style: none;
+        /* Liens */
+        .link-list { list-style: none; }
+        .link-list a {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 8px; margin: 0 -8px; border-radius: var(--radius-sm);
+            color: var(--color-text); text-decoration: none;
         }
-
-        .intro-guide summary::-webkit-details-marker {
-            display: none;
+        .link-list a:hover { background: var(--color-primary-bg); color: var(--color-primary-dark); }
+        .link-list a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+        .link-label { flex: 1; }
+        .badge {
+            flex: none; font-size: 10.5px; font-weight: 700; letter-spacing: .03em;
+            padding: 2px 7px; border-radius: var(--radius-pill); min-width: 44px; text-align: center;
+            color: var(--color-primary-dark); background: var(--color-primary-bg);
         }
+        .badge.pdf { color: var(--type-pdf); background: color-mix(in srgb, var(--type-pdf) 10%, white); }
+        .badge.doc { color: var(--type-doc); background: color-mix(in srgb, var(--type-doc) 10%, white); }
+        .badge.tex { color: var(--type-tex); background: color-mix(in srgb, var(--type-tex) 10%, white); }
+        .file-meta { flex: none; font-size: 11.5px; color: var(--color-text-faint); }
 
-        .intro-guide-body {
-            padding: 0 18px 18px;
-            font-size: 13px;
-            color: var(--color-text-muted);
-            line-height: 1.6;
+        /* Dates */
+        .info-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--color-text-muted); margin: 12px 0 4px; }
+        .date-list { list-style: none; }
+        .date-list li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--color-border); font-size: 14px; }
+        .date-list li:last-child { border-bottom: none; }
+        .date-list li.passe { color: var(--color-text-faint); }
+        .date-list li.passe .d { text-decoration: line-through; }
+        .date-list li .tag { font-size: 11px; color: var(--color-text-faint); white-space: nowrap; }
+        .date-list li.prochaine { font-weight: 700; }
+        .date-list li.prochaine .tag { color: var(--soon); }
+        .date-list .k { color: var(--color-text-muted); }
+
+        /* Rappels */
+        .tips { list-style: none; }
+        .tips li { position: relative; padding: 6px 0 6px 22px; font-size: 14px; border-bottom: 1px dashed var(--color-border); }
+        .tips li:last-child { border-bottom: none; }
+        .tips li::before { content: "✓"; position: absolute; left: 2px; top: 6px; color: var(--cat-aux); font-weight: 700; }
+        .tips a { color: var(--color-primary-dark); }
+
+        .field-help { font-size: 12.5px; color: var(--color-text-muted); margin-top: 8px; line-height: 1.5; }
+
+        /* Salles */
+        .room-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 4px 0 10px; font-size: 13px; color: var(--color-text-muted); }
+        .room-tools input { width: 80px; font: inherit; padding: 5px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); }
+        .room-tools input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+        .room-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 28px; }
+        .room-cols h3 { font-size: 13px; margin: 6px 0 4px; color: var(--color-text-muted); }
+        .rooms { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; }
+        .room {
+            display: flex; justify-content: space-between; align-items: baseline; gap: 6px;
+            padding: 5px 9px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: 13px;
+            background: color-mix(in srgb, var(--cat-salles) 4%, white);
         }
+        .room-name { font-weight: 600; }
+        .room-cap { color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 
-        .intro-guide-body ol {
-            margin: 0 0 10px 18px;
-        }
+        /* Recherche : masquage et surlignage */
+        .is-hidden { display: none !important; }
+        mark { background: var(--color-highlight); color: inherit; border-radius: 2px; padding: 0 1px; }
+        .no-results { display: none; text-align: center; color: var(--color-text-muted); padding: 30px 10px; }
+        .no-results.show { display: block; }
 
-        .intro-guide-body li {
-            margin-bottom: 6px;
-        }
+        .footer { max-width: 1200px; margin: 28px auto 0; font-size: 13px; color: var(--color-text-muted); text-align: center; }
+        .footer a { color: var(--color-primary-dark); }
 
-        .intro-guide-body code {
-            background: var(--color-page-bg);
-            padding: 1px 5px;
-            border-radius: var(--radius-sm);
-            font-size: 12px;
-        }
-
-        .step-card {
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius);
-            padding: 20px;
-            margin-bottom: 22px;
-            background: var(--color-surface);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .step-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 4px;
-        }
-
-        .step-badge {
-            flex-shrink: 0;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: var(--color-primary);
-            color: var(--color-on-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            line-height: 1;
-        }
-
-        .step-title {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--color-text);
-        }
-
-        details.column-mapping { margin-top:12px; border:1px dashed var(--color-primary-border); border-radius:var(--radius); padding:0 14px; background:var(--color-primary-bg-subtle); }
-        details.column-mapping summary { cursor:pointer; padding:10px 0; font-weight:600; color:var(--color-primary-dark); font-size:13px; }
-        details.column-mapping summary .summary-hint { font-weight:normal; color:var(--color-text-muted); margin-left:6px; }
-        details.column-mapping[open] summary { border-bottom:1px solid var(--color-divider); margin-bottom:8px; }
-        details.column-mapping .mapping-block { margin-bottom:14px; }
-        details.column-mapping .mapping-title { font-size:13px; font-weight:600; color:var(--color-text-secondary); margin-bottom:4px; }
-        .pick-choice { width:auto; margin:0; padding:8px 14px; font-size:13px; }
-        .verification-list { font-size:14px; line-height:1.9; }
-        .verification-list p { margin:0; }
-        .verification-list .verification-total { margin-top:10px; padding-top:8px; border-top:1px solid var(--color-divider); }
-        .verification-list .verification-empty { color:var(--color-text-muted); font-size:13px; }
-        .room-cards { display:flex; flex-wrap:wrap; gap:10px; margin:12px 0; }
-        .room-card { display:flex; align-items:center; gap:12px; padding:10px 14px; border:1px solid var(--color-primary-border); background:var(--color-primary-bg); border-radius:var(--radius); }
-        .room-card-name { font-weight:700; color:var(--color-primary-dark); }
-        .room-card-capacity { font-size:12px; color:var(--color-text-muted); }
-        .room-card-capacity input { width:90px; padding:4px 6px; border:1px solid var(--color-danger); border-radius:var(--radius-sm); font-size:13px; }
-        .room-card-badge { font-size:11px; color:var(--color-primary-dark); background:var(--color-primary-bg-hover); border-radius:var(--radius-pill); padding:1px 7px; margin-left:4px; }
-        .room-card-remove { width:auto; margin:0; padding:0 6px; background:none; border:none; color:var(--color-danger); font-size:18px; line-height:1; cursor:pointer; box-shadow:none; }
-        .room-card-remove:hover { color:var(--color-danger-dark); background:none; transform:none; }
-        .room-add-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:4px; }
-        .room-add-row select { flex:1; min-width:220px; width:auto; }
-        .room-add-row input[type="number"] { padding:12px; border:2px solid var(--color-primary); border-radius:var(--radius); background:var(--color-primary-bg); font-size:14px; }
-        .room-add-row input[type="text"] { width:170px; }
-        .room-add-row button { width:auto; margin:0; padding:12px 20px; }
-        .nrc-table { border-collapse:collapse; font-size:13px; margin-top:10px; }
-        .nrc-table th, .nrc-table td { padding:6px 12px; text-align:left; border-bottom:1px solid var(--color-divider); vertical-align:middle; }
-        .nrc-table th { background:var(--color-primary-bg); color:var(--color-primary-dark); }
-        .nrc-table td input[type="checkbox"] { width:16px; height:16px; margin:0; }
-        .nrc-table .nrc-count { color:var(--color-text-faint); font-weight:normal; margin-left:4px; }
-        .nrc-table .nrc-section { display:block; font-size:11px; color:var(--color-text-faint); }
-
-        .step-tag {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--color-primary);
-            background: var(--color-page-bg);
-            border: 1px solid var(--color-border);
-            padding: 2px 8px;
-            border-radius: var(--radius-pill);
-            margin-left: 2px;
-        }
-
-        .step-desc {
-            font-size: 13px;
-            color: var(--color-text-muted);
-            line-height: 1.6;
-            margin: 6px 0 16px;
-        }
-
-        .field-help {
-            font-size: 12px;
-            color: var(--color-text-muted);
-            margin-top: 4px;
-            line-height: 1.5;
-        }
-
-        .field-help code {
-            background: var(--color-page-bg);
-            padding: 1px 5px;
-            border-radius: var(--radius-sm);
+        @media (max-width: 560px) {
+            body { padding: 0 12px 32px; }
+            .grid { grid-template-columns: 1fr; }
+            .search-box kbd { display: none; }
+            #recherche { padding-right: 12px; }
         }
     </style>
 </head>
 <body>
 
-        <div class="container">
-        <div class="app-hero">
+    <div class="container">
+        <header class="app-hero">
             <p class="app-eyebrow">Outil interne — Département de mathématiques et de statistique</p>
             <h1>📄 Partage de documents importants DMS</h1>
-        </div>
+            <p class="subtitle">Session en cours : <strong id="session-courante">Automne 2026</strong> · documents, dates et informations utiles pour l'enseignement au DMS.</p>
 
+            <div class="search-row">
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input id="recherche" type="search" placeholder="Rechercher un document, une date, un local (ex. guide, reprise, VCH-2850)…" aria-label="Rechercher" autocomplete="off">
+                    <kbd>/</kbd>
+                </div>
+            </div>
+            <div class="chips" role="group" aria-label="Filtrer par catégorie">
+                <button class="chip" type="button" data-filtre="tout" aria-pressed="true">Tout</button>
+                <button class="chip" type="button" data-filtre="examens" style="--c: var(--cat-examens)" aria-pressed="false"><span class="dot"></span>Examens</button>
+                <button class="chip" type="button" data-filtre="reprises" style="--c: var(--cat-reprises)" aria-pressed="false"><span class="dot"></span>Reprises</button>
+                <button class="chip" type="button" data-filtre="guides" style="--c: var(--cat-guides)" aria-pressed="false"><span class="dot"></span>Guides</button>
+                <button class="chip" type="button" data-filtre="aux" style="--c: var(--cat-aux)" aria-pressed="false"><span class="dot"></span>Auxiliaires</button>
+                <button class="chip" type="button" data-filtre="copies" style="--c: var(--cat-copies)" aria-pressed="false"><span class="dot"></span>Copies</button>
+                <button class="chip" type="button" data-filtre="session" style="--c: var(--cat-session)" aria-pressed="false"><span class="dot"></span>Dates</button>
+                <button class="chip" type="button" data-filtre="salles" style="--c: var(--cat-salles)" aria-pressed="false"><span class="dot"></span>Salles</button>
+                <button class="chip" type="button" data-filtre="infos" style="--c: var(--cat-infos)" aria-pressed="false"><span class="dot"></span>Infos</button>
+            </div>
+        </header>
+
+        <section class="upcoming" id="echeances" aria-labelledby="titre-echeances">
+            <p class="section-title" id="titre-echeances">Prochaines échéances</p>
+            <ul class="upcoming-list" id="liste-echeances"></ul>
+        </section>
+    </div>
 
     <main class="container">
-        <div class="grid">
+        <div class="grid" id="grille">
 
             <!-- Examens -->
-            <div class="card">
+            <section class="card" data-cat="examens" style="--c: var(--cat-examens)">
                 <div class="card-header">
-                    <div class="card-icon red"><i class="fa-solid fa-pen-clip"></i></div>
-                    <h2>Examens AUTOMNE 2026</h2>
+                    <div class="card-icon" aria-hidden="true">📝</div>
+                    <div><h2>Examens AUTOMNE 2026</h2><p class="card-sub">Calendriers des examens</p></div>
                 </div>
                 <div class="card-body">
                     <ul class="link-list">
-                        <li><a data-glob="Documents/Calendrier examens DMS/*.pdf" href="Documents/Calendrier%20examens%20DMS/calendrier%20examen%20A26%20CDA.pdf" target="_blank"><i class="fa-solid fa-chevron-right"></i> Calendrier des examens du DMS</a></li>
+                        <li><a data-glob="Documents/Calendrier examens DMS/*.pdf" href="Documents/Calendrier%20examens%20DMS/calendrier%20examen%20A26%20CDA.pdf" target="_blank"><span class="link-label">Calendrier des examens du DMS</span></a></li>
+                        <li><a data-glob="Documents/Calendrier examens SSE/*.pdf" href="Documents/Calendrier%20examens%20SSE/calendrier-SSE-A26.pdf" target="_blank"><span class="link-label">Calendrier des examens du SSE</span></a></li>
+                        <li><a data-glob="Documents/Consignes surveillants/*.pdf" href="Documents/Consignes%20surveillants/Consigne%20pour%20les%20surveillants.pdf" target="_blank"><span class="link-label">Consignes pour les surveillants</span></a></li>
+                    </ul>
+                </div>
+            </section>
 
-
-                        <li><a data-glob="Documents/Calendrier examens SSE/*.pdf" href="Documents/Calendrier%20examens%20SSE/calendrier-SSE-A26.pdf" target="_blank"><i class="fa-solid fa-chevron-right"></i> Calendrier des examens du SSE</a></li>
-                        <li><a data-glob="Documents/Informations reprises DMS/*.pdf" href="Documents/Informations%20reprises%20DMS/Informations_reprises_DMS.pdf" target="_blank"><i class="fa-solid fa-chevron-right"></i> Informations sur les reprises DMS</a></li>
-                        <li><a data-glob="Documents/Tableau reprises DMS/*.docx" href="Documents/Tableau%20reprises%20DMS/Tableau%20%C3%A0%20compl%C3%A9ter%20-%20reprise%20d%27examen%20DMS%20-%20Gabarit.docx" target="_blank"><i class="fa-solid fa-chevron-right"></i> Tableau à remplir reprises DMS</a></li>
+            <!-- Reprises -->
+            <section class="card" data-cat="reprises" style="--c: var(--cat-reprises)">
+                <div class="card-header">
+                    <div class="card-icon" aria-hidden="true">🔁</div>
+                    <div><h2>Reprises d'examen</h2><p class="card-sub">Séances de la FSG et du DMS</p></div>
+                </div>
+                <div class="card-body">
+                    <ul class="link-list">
+                        <li><a data-glob="Documents/Informations reprises DMS/*.pdf" href="Documents/Informations%20reprises%20DMS/Informations_reprises_DMS.pdf" target="_blank"><span class="link-label">Informations sur les reprises DMS</span></a></li>
+                        <li><a data-glob="Documents/Tableau reprises DMS/*.docx" href="Documents/Tableau%20reprises%20DMS/Tableau%20%C3%A0%20compl%C3%A9ter%20-%20reprise%20d%27examen%20DMS%20-%20Gabarit.docx" target="_blank"><span class="link-label">Tableau à remplir reprises DMS</span></a></li>
                     </ul>
 
-
-                    <p class="info-label"><i class="fa-solid fa-calendar-days"></i> Dates des reprises FSG</p>
-                    <ul class="date-list">
-                        <li>Jeudi 29 octobre 2026</li>
-                        <li>Samedi 7 novembre 2026</li>
-                        <li>Jeudi 17 décembre 2026</li>
-                        <li>Jeudi 7 janvier 2027 (DMS, groupe avec mesures d'accommodement)</li>
-                        <li>Samedi 16 janvier 2027</li>
+                    <p class="info-label">Dates des reprises FSG</p>
+                    <ul class="date-list" data-label="Reprise d'examen">
+                        <li data-date="2026-10-29"><span class="d">Jeudi 29 octobre 2026</span></li>
+                        <li data-date="2026-11-07"><span class="d">Samedi 7 novembre 2026</span></li>
+                        <li data-date="2026-12-17"><span class="d">Jeudi 17 décembre 2026</span></li>
+                        <li data-date="2027-01-07"><span class="d">Jeudi 7 janvier 2027 <span class="k">· DMS, groupe avec mesures d'accommodement</span></span></li>
+                        <li data-date="2027-01-16"><span class="d">Samedi 16 janvier 2027</span></li>
                     </ul>
                     <p class="field-help">Début des reprises : 9 h. Si la personne étudiante a deux examens le même jour, le second peut être planifié en après-midi en avisant le DMS à l'avance. Inscrire deux dates au plan de cours (une à la mi-session, une en fin de session); toutes les séances restent utilisables.</p>
                 </div>
-            </div>
+            </section>
 
-            <!-- Guides -->
-            <div class="card">
+            <!-- Calendrier de la session -->
+            <section class="card" data-cat="session" style="--c: var(--cat-session)">
                 <div class="card-header">
-                    <div class="card-icon gold"><i class="fa-solid fa-book-open"></i></div>
-                    <h2>Documents</h2>
-                </div>
-                <div class="card-body">
-                    <ul class="link-list">
-                        <li><a data-glob="Documents/Guide enseignant/*.pdf" href="Documents/Guide%20enseignant/Guide%20de%20l%27enseignant%2026-27_version%20finale.pdf" target="_blank"><i class="fa-solid fa-chevron-right"></i> Guide de l'enseignant</a></li>
-                        <li><a data-glob="Documents/Guide auxiliaire/*.pdf" href="Documents/Guide%20auxiliaire/Guide%20auxiliaire%20d%27enseignement%20H26.pdf" target="_blank"><i class="fa-solid fa-chevron-right"></i> Guide de l'auxiliaire d'enseignement</a></li>
-                        <li><a data-glob="Documents/Consignes surveillants/*.pdf" href="Documents/Consignes%20surveillants/Consigne%20pour%20les%20surveillants.pdf"><i class="fa-solid fa-chevron-right"></i> Consignes pour les surveillants</a></li>
-                        <li><a data-glob="Documents/Politique aide pedagogique/*.pdf" href="Documents/Politique%20aide%20pedagogique/Politique%20d%27aide%20p%C3%A9dagogique%20du%20DMS.pdf" target="_blank"><i class="fa-solid fa-chevron-right"></i> Politique d'aide pédagogique du DMS</a></li>
-                        <li><a data-glob="Documents/Tableau auxiliaires/*.pdf" href="Documents/Tableau%20auxiliaires/Tableau_attribution_A26_complet_revise.pdf" target="_blank"><i class="fa-solid fa-chevron-right"></i> Tableau des auxiliaires d'enseignement</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Gestion des copies d'examen -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon green"><i class="fa-solid fa-file-pen"></i></div>
-                    <h2>Gestion des copies d'examen</h2>
-                </div>
-                <div class="card-body">
-                    <ul class="link-list">
-                                                <li><a href="Evaluation.cls"><i class="fa-solid fa-chevron-right"></i> Classe LaTeX pour le gabarit examen</a></li>
-                        <li><a href="Exemple examen.tex"><i class="fa-solid fa-chevron-right"></i> Exemple d'examen (classe LaTeX)</a></li>
-                        <li><a href="../PDFExamens/" target="_blank"><i class="fa-solid fa-chevron-right"></i> Copies nominatives &amp; listes de présence</a></li>
-                    </ul>
-                </div>
-            </div>
-                        <!-- Informations générales -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon blue"><i class="fa-solid fa-circle-info"></i></div>
-                    <h2>Informations générales</h2>
-                </div>
-                <div class="card-body">
-                    <ul class="link-list">
-                        <li><a href="https://www.fsg.ulaval.ca/departements/departement-de-mathematiques-et-de-statistique" target="_blank"><i class="fa-solid fa-chevron-right"></i> Site web du CDA</a></li>
-                        <li><a data-glob="Documents/Journee passerelle/*.pdf" href="Documents/Journee%20passerelle/Journee-passerelle_H26.pdf" target="_blank"><i class="fa-solid fa-chevron-right"></i> Journées passerelles</a></li>
-                        <li><a href="https://ulavaldti.sharepoint.com/sites/AuxiliaireduDMS" target="_blank"><i class="fa-solid fa-chevron-right"></i> Espace des auxiliaires du DMS (recrutement et formation)</a></li>
-                        <li><a href="https://ulavaldti.sharepoint.com/sites/AuxiliaireduDMS/SitePages/Capsule-de-formation-correcteur.aspx" target="_blank"><i class="fa-solid fa-chevron-right"></i> Capsules de formation des correcteurs (obligatoires pour les nouveaux)</a></li>
-                    </ul>
-                                        <p class="info-label"><i class="fa-solid fa-calendar-days"></i> Dates importantes</p>
-                    <ul class="date-list">
-                        <li>Début des cours : 31 août 2026</li>
-                        <li>Abandon avec remb. : 15 septembre 2026</li>
-                        <li>Abandon sans remb. : 10 novembre 2026</li>
-                        <li>Fin de session : 11 décembre 2026</li>
-                        <li>Date limite des notes : 8 janvier 2027, 17 h</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Rappels examens -->
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon red"><i class="fa-solid fa-bell"></i></div>
-                    <h2>Rappels pour les examens</h2>
+                    <div class="card-icon" aria-hidden="true">📅</div>
+                    <div><h2>Dates importantes</h2><p class="card-sub">Calendrier universitaire, automne 2026</p></div>
                 </div>
                 <div class="card-body">
                     <ul class="date-list">
+                        <li data-date="2026-08-31" data-label="Début des cours"><span class="d"><span class="k">Début des cours</span> · 31 août 2026</span></li>
+                        <li data-date="2026-09-15" data-label="Abandon avec remboursement"><span class="d"><span class="k">Abandon avec remb.</span> · 15 septembre 2026</span></li>
+                        <li data-date="2026-11-10" data-label="Abandon sans remboursement"><span class="d"><span class="k">Abandon sans remb.</span> · 10 novembre 2026</span></li>
+                        <li data-date="2026-12-11" data-label="Fin de session"><span class="d"><span class="k">Fin de session</span> · 11 décembre 2026</span></li>
+                        <li data-date="2027-01-08" data-label="Date limite des notes (17 h)"><span class="d"><span class="k">Date limite des notes</span> · 8 janvier 2027, 17 h</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Rappels -->
+            <section class="card" data-cat="examens" style="--c: var(--cat-examens)">
+                <div class="card-header">
+                    <div class="card-icon" aria-hidden="true">🔔</div>
+                    <div><h2>Rappels pour les examens</h2><p class="card-sub">Points d'information du département</p></div>
+                </div>
+                <div class="card-body">
+                    <ul class="tips">
                         <li>Contacter ses surveillants quelques jours avant l'examen et leur donner des consignes claires.</li>
                         <li>Toutes les tables des salles VCH et PLT sont numérotées.</li>
                         <li>Un problème avec un surveillant (avant, pendant ou après) : écrire à la boîte <a href="mailto:examens@mat.ulaval.ca">examens@mat.ulaval.ca</a>.</li>
@@ -565,79 +328,311 @@
                         <li>Transmettre les heures des auxiliaires à la coordonnatrice à l'administration après chaque séance de correction, sans attendre la fin de session.</li>
                     </ul>
                 </div>
-            </div>
+            </section>
 
-            <!-- Capacité des salles -->
-            <div class="card">
+            <!-- Guides et politiques -->
+            <section class="card" data-cat="guides" style="--c: var(--cat-guides)">
                 <div class="card-header">
-                    <div class="card-icon blue"><i class="fa-solid fa-door-open"></i></div>
-                    <h2>Capacité des salles (examen)</h2>
+                    <div class="card-icon" aria-hidden="true">📚</div>
+                    <div><h2>Guides et politiques</h2><p class="card-sub">Pour les personnes enseignantes</p></div>
                 </div>
                 <div class="card-body">
-                    <p class="field-help">Places en mode examen, FSG, automne 2026. VCH-3870 et PLT-2708 sont des salles collaboratives.</p>
-                    <details>
-                        <summary>Pavillon Alexandre-Vachon</summary>
-                        <table>
-                                <tr><td>VCH-2810</td><td style="text-align:right">18</td></tr>
-                                <tr><td>VCH-2820</td><td style="text-align:right">20</td></tr>
-                                <tr><td>VCH-2830</td><td style="text-align:right">68</td></tr>
-                                <tr><td>VCH-2840</td><td style="text-align:right">49</td></tr>
-                                <tr><td>VCH-2850</td><td style="text-align:right">201</td></tr>
-                                <tr><td>VCH-2860</td><td style="text-align:right">70</td></tr>
-                                <tr><td>VCH-2870</td><td style="text-align:right">41</td></tr>
-                                <tr><td>VCH-2880</td><td style="text-align:right">110</td></tr>
-                                <tr><td>VCH-3820</td><td style="text-align:right">56</td></tr>
-                                <tr><td>VCH-3830</td><td style="text-align:right">20</td></tr>
-                                <tr><td>VCH-3840</td><td style="text-align:right">25</td></tr>
-                                <tr><td>VCH-3850</td><td style="text-align:right">61</td></tr>
-                                <tr><td>VCH-3860</td><td style="text-align:right">80</td></tr>
-                                <tr><td>VCH-3880</td><td style="text-align:right">110</td></tr>
-                        </table>
-                    </details>
-                    <details>
-                        <summary>Pavillon Adrien-Pouliot</summary>
-                        <table>
-                                <tr><td>PLT-1112</td><td style="text-align:right">252</td></tr>
-                                <tr><td>PLT-2341</td><td style="text-align:right">64</td></tr>
-                                <tr><td>PLT-2500</td><td style="text-align:right">20</td></tr>
-                                <tr><td>PLT-2501</td><td style="text-align:right">70</td></tr>
-                                <tr><td>PLT-2504</td><td style="text-align:right">19</td></tr>
-                                <tr><td>PLT-2508</td><td style="text-align:right">20</td></tr>
-                                <tr><td>PLT-2510</td><td style="text-align:right">19</td></tr>
-                                <tr><td>PLT-2512</td><td style="text-align:right">20</td></tr>
-                                <tr><td>PLT-2540</td><td style="text-align:right">9</td></tr>
-                                <tr><td>PLT-2542</td><td style="text-align:right">9</td></tr>
-                                <tr><td>PLT-2544</td><td style="text-align:right">9</td></tr>
-                                <tr><td>PLT-2546</td><td style="text-align:right">20</td></tr>
-                                <tr><td>PLT-2548</td><td style="text-align:right">19</td></tr>
-                                <tr><td>PLT-2551</td><td style="text-align:right">64</td></tr>
-                                <tr><td>PLT-2569</td><td style="text-align:right">15</td></tr>
-                                <tr><td>PLT-2573</td><td style="text-align:right">25</td></tr>
-                                <tr><td>PLT-2575</td><td style="text-align:right">16</td></tr>
-                                <tr><td>PLT-2700</td><td style="text-align:right">70</td></tr>
-                                <tr><td>PLT-2744</td><td style="text-align:right">32</td></tr>
-                                <tr><td>PLT-2750</td><td style="text-align:right">25</td></tr>
-                                <tr><td>PLT-2751</td><td style="text-align:right">84</td></tr>
-                                <tr><td>PLT-2765</td><td style="text-align:right">41</td></tr>
-                                <tr><td>PLT-2783</td><td style="text-align:right">40</td></tr>
-                                <tr><td>PLT-2903</td><td style="text-align:right">10</td></tr>
-                                <tr><td>PLT-3775</td><td style="text-align:right">40</td></tr>
-                                <tr><td>PLT-4108</td><td style="text-align:right">18</td></tr>
-                        </table>
-                    </details>
+                    <ul class="link-list">
+                        <li><a data-glob="Documents/Guide enseignant/*.pdf" href="Documents/Guide%20enseignant/Guide%20de%20l%27enseignant%2026-27_version%20finale.pdf" target="_blank"><span class="link-label">Guide de l'enseignant</span></a></li>
+                        <li><a data-glob="Documents/Politique aide pedagogique/*.pdf" href="Documents/Politique%20aide%20pedagogique/Politique%20d%27aide%20p%C3%A9dagogique%20du%20DMS.pdf" target="_blank"><span class="link-label">Politique d'aide pédagogique du DMS</span></a></li>
+                    </ul>
                 </div>
-            </div>
+            </section>
 
-            <!-- Placeholders -->
-            <div class="card placeholder">À venir</div>
-            <div class="card placeholder">À venir</div>
+            <!-- Auxiliaires -->
+            <section class="card" data-cat="aux" style="--c: var(--cat-aux)">
+                <div class="card-header">
+                    <div class="card-icon" aria-hidden="true">🧑‍🏫</div>
+                    <div><h2>Auxiliaires d'enseignement</h2><p class="card-sub">Attribution, guide et formation</p></div>
+                </div>
+                <div class="card-body">
+                    <ul class="link-list">
+                        <li><a data-glob="Documents/Tableau auxiliaires/*.pdf" href="Documents/Tableau%20auxiliaires/Tableau_attribution_A26_complet_revise.pdf" target="_blank"><span class="link-label">Tableau des auxiliaires d'enseignement</span></a></li>
+                        <li><a data-glob="Documents/Guide auxiliaire/*.pdf" href="Documents/Guide%20auxiliaire/Guide%20auxiliaire%20d%27enseignement%20H26.pdf" target="_blank"><span class="link-label">Guide de l'auxiliaire d'enseignement</span></a></li>
+                        <li><a href="https://ulavaldti.sharepoint.com/sites/AuxiliaireduDMS" target="_blank"><span class="link-label">Espace des auxiliaires du DMS (recrutement et formation)</span></a></li>
+                        <li><a href="https://ulavaldti.sharepoint.com/sites/AuxiliaireduDMS/SitePages/Capsule-de-formation-correcteur.aspx" target="_blank"><span class="link-label">Capsules de formation des correcteurs (obligatoires pour les nouveaux)</span></a></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Copies d'examen -->
+            <section class="card" data-cat="copies" style="--c: var(--cat-copies)">
+                <div class="card-header">
+                    <div class="card-icon" aria-hidden="true">🗂️</div>
+                    <div><h2>Gestion des copies d'examen</h2><p class="card-sub">Gabarit LaTeX et copies nominatives</p></div>
+                </div>
+                <div class="card-body">
+                    <ul class="link-list">
+                        <li><a href="Evaluation.cls"><span class="link-label">Classe LaTeX pour le gabarit examen</span></a></li>
+                        <li><a href="Exemple examen.tex"><span class="link-label">Exemple d'examen (classe LaTeX)</span></a></li>
+                        <li><a href="../PDFExamens/" target="_blank"><span class="link-label">Copies nominatives &amp; listes de présence</span></a></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Informations générales -->
+            <section class="card" data-cat="infos" style="--c: var(--cat-infos)">
+                <div class="card-header">
+                    <div class="card-icon" aria-hidden="true">ℹ️</div>
+                    <div><h2>Informations générales</h2><p class="card-sub">Liens utiles</p></div>
+                </div>
+                <div class="card-body">
+                    <ul class="link-list">
+                        <li><a href="https://www.fsg.ulaval.ca/departements/departement-de-mathematiques-et-de-statistique" target="_blank"><span class="link-label">Site web du DMS</span></a></li>
+                        <li><a data-glob="Documents/Journee passerelle/*.pdf" href="Documents/Journee%20passerelle/Journee-passerelle_H26.pdf" target="_blank"><span class="link-label">Journées passerelles</span></a></li>
+                        <li><a href="mailto:examens@mat.ulaval.ca"><span class="link-label">Boîte des examens du DMS (examens@mat.ulaval.ca)</span></a></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Capacité des salles -->
+            <section class="card wide" data-cat="salles" style="--c: var(--cat-salles)">
+                <div class="card-header">
+                    <div class="card-icon" aria-hidden="true">🏫</div>
+                    <div><h2>Capacité des salles (examen)</h2><p class="card-sub">Places en mode examen, FSG, automne 2026 · VCH-3870 et PLT-2708 sont des salles collaboratives</p></div>
+                </div>
+                <div class="card-body">
+                    <div class="room-tools">
+                        <label for="places-min">Au moins</label>
+                        <input id="places-min" type="number" min="0" step="10" placeholder="0" inputmode="numeric">
+                        <span>places · <span id="nb-salles"></span></span>
+                    </div>
+                    <div class="room-cols">
+                        <div>
+                            <h3>Pavillon Alexandre-Vachon (VCH)</h3>
+                            <ul class="rooms">
+                            <li class="room" data-places="18"><span class="room-name">VCH-2810</span><span class="room-cap">18</span></li>
+                            <li class="room" data-places="20"><span class="room-name">VCH-2820</span><span class="room-cap">20</span></li>
+                            <li class="room" data-places="68"><span class="room-name">VCH-2830</span><span class="room-cap">68</span></li>
+                            <li class="room" data-places="49"><span class="room-name">VCH-2840</span><span class="room-cap">49</span></li>
+                            <li class="room" data-places="201"><span class="room-name">VCH-2850</span><span class="room-cap">201</span></li>
+                            <li class="room" data-places="70"><span class="room-name">VCH-2860</span><span class="room-cap">70</span></li>
+                            <li class="room" data-places="41"><span class="room-name">VCH-2870</span><span class="room-cap">41</span></li>
+                            <li class="room" data-places="110"><span class="room-name">VCH-2880</span><span class="room-cap">110</span></li>
+                            <li class="room" data-places="56"><span class="room-name">VCH-3820</span><span class="room-cap">56</span></li>
+                            <li class="room" data-places="20"><span class="room-name">VCH-3830</span><span class="room-cap">20</span></li>
+                            <li class="room" data-places="25"><span class="room-name">VCH-3840</span><span class="room-cap">25</span></li>
+                            <li class="room" data-places="61"><span class="room-name">VCH-3850</span><span class="room-cap">61</span></li>
+                            <li class="room" data-places="80"><span class="room-name">VCH-3860</span><span class="room-cap">80</span></li>
+                            <li class="room" data-places="110"><span class="room-name">VCH-3880</span><span class="room-cap">110</span></li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3>Pavillon Adrien-Pouliot (PLT)</h3>
+                            <ul class="rooms">
+                            <li class="room" data-places="252"><span class="room-name">PLT-1112</span><span class="room-cap">252</span></li>
+                            <li class="room" data-places="64"><span class="room-name">PLT-2341</span><span class="room-cap">64</span></li>
+                            <li class="room" data-places="20"><span class="room-name">PLT-2500</span><span class="room-cap">20</span></li>
+                            <li class="room" data-places="70"><span class="room-name">PLT-2501</span><span class="room-cap">70</span></li>
+                            <li class="room" data-places="19"><span class="room-name">PLT-2504</span><span class="room-cap">19</span></li>
+                            <li class="room" data-places="20"><span class="room-name">PLT-2508</span><span class="room-cap">20</span></li>
+                            <li class="room" data-places="19"><span class="room-name">PLT-2510</span><span class="room-cap">19</span></li>
+                            <li class="room" data-places="20"><span class="room-name">PLT-2512</span><span class="room-cap">20</span></li>
+                            <li class="room" data-places="9"><span class="room-name">PLT-2540</span><span class="room-cap">9</span></li>
+                            <li class="room" data-places="9"><span class="room-name">PLT-2542</span><span class="room-cap">9</span></li>
+                            <li class="room" data-places="9"><span class="room-name">PLT-2544</span><span class="room-cap">9</span></li>
+                            <li class="room" data-places="20"><span class="room-name">PLT-2546</span><span class="room-cap">20</span></li>
+                            <li class="room" data-places="19"><span class="room-name">PLT-2548</span><span class="room-cap">19</span></li>
+                            <li class="room" data-places="64"><span class="room-name">PLT-2551</span><span class="room-cap">64</span></li>
+                            <li class="room" data-places="15"><span class="room-name">PLT-2569</span><span class="room-cap">15</span></li>
+                            <li class="room" data-places="25"><span class="room-name">PLT-2573</span><span class="room-cap">25</span></li>
+                            <li class="room" data-places="16"><span class="room-name">PLT-2575</span><span class="room-cap">16</span></li>
+                            <li class="room" data-places="70"><span class="room-name">PLT-2700</span><span class="room-cap">70</span></li>
+                            <li class="room" data-places="32"><span class="room-name">PLT-2744</span><span class="room-cap">32</span></li>
+                            <li class="room" data-places="25"><span class="room-name">PLT-2750</span><span class="room-cap">25</span></li>
+                            <li class="room" data-places="84"><span class="room-name">PLT-2751</span><span class="room-cap">84</span></li>
+                            <li class="room" data-places="41"><span class="room-name">PLT-2765</span><span class="room-cap">41</span></li>
+                            <li class="room" data-places="40"><span class="room-name">PLT-2783</span><span class="room-cap">40</span></li>
+                            <li class="room" data-places="10"><span class="room-name">PLT-2903</span><span class="room-cap">10</span></li>
+                            <li class="room" data-places="40"><span class="room-name">PLT-3775</span><span class="room-cap">40</span></li>
+                            <li class="room" data-places="18"><span class="room-name">PLT-4108</span><span class="room-cap">18</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
         </div>
+        <p class="no-results" id="aucun">Aucun résultat. Essayez un autre mot (ex. « guide », « reprise », « 2850 »).</p>
     </main>
 
     <footer class="footer">
         Pour toute question ou suggestion, contactez <a href="mailto:julien.miron@mat.ulaval.ca">julien.miron@mat.ulaval.ca</a>.
     </footer>
+
+    <script>
+    (function () {
+        "use strict";
+
+        /* ---------- Pastilles de type de fichier ---------- */
+        document.querySelectorAll(".link-list a").forEach(function (a) {
+            var href = a.getAttribute("href") || "";
+            var ext = (decodeURIComponent(href).split(/[?#]/)[0].match(/\.([a-z0-9]+)$/i) || [])[1];
+            ext = ext ? ext.toLowerCase() : "";
+            var b = document.createElement("span");
+            b.className = "badge";
+            if (href.indexOf("mailto:") === 0) { b.textContent = "Courriel"; }
+            else if (ext === "pdf") { b.textContent = "PDF"; b.classList.add("pdf"); }
+            else if (ext === "docx" || ext === "doc") { b.textContent = "Word"; b.classList.add("doc"); }
+            else if (ext === "tex" || ext === "cls") { b.textContent = "LaTeX"; b.classList.add("tex"); }
+            else if (/^https?:/.test(href)) { b.textContent = "Lien"; }
+            else { b.textContent = "Outil"; }
+            a.insertBefore(b, a.firstChild);
+            /* Session visible dans le nom du fichier (ex. A26, H26, 26-27) */
+            var m = decodeURIComponent(href).match(/\b([AHE]\d{2}|\d{2}-\d{2})\b/);
+            if (m && ext) {
+                var s = document.createElement("span");
+                s.className = "file-meta";
+                s.textContent = m[1];
+                a.appendChild(s);
+            }
+        });
+
+        /* ---------- Dates passées, prochaine date, échéances ---------- */
+        var auj = new Date(); auj.setHours(0, 0, 0, 0);
+        var JOUR = 86400000;
+        var fmt = new Intl.DateTimeFormat("fr-CA", { weekday: "long", day: "numeric", month: "long" });
+        function parse(d) { var p = d.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+        function dans(n) { return n === 0 ? "Aujourd'hui" : n === 1 ? "Demain" : "Dans " + n + " jours"; }
+
+        var aVenir = [];
+        document.querySelectorAll(".date-list").forEach(function (ul) {
+            var premiere = true;
+            var carte = ul.closest(".card");
+            ul.querySelectorAll("li[data-date]").forEach(function (li) {
+                var d = parse(li.dataset.date);
+                var n = Math.round((d - auj) / JOUR);
+                var tag = document.createElement("span");
+                tag.className = "tag";
+                if (n < 0) { li.classList.add("passe"); tag.textContent = "passée"; }
+                else {
+                    tag.textContent = dans(n);
+                    if (premiere) { li.classList.add("prochaine"); premiere = false; }
+                    aVenir.push({
+                        n: n, d: d,
+                        quoi: li.dataset.label || ul.dataset.label || li.textContent.trim(),
+                        c: getComputedStyle(carte).getPropertyValue("--c")
+                    });
+                }
+                li.appendChild(tag);
+            });
+        });
+
+        var liste = document.getElementById("liste-echeances");
+        aVenir.sort(function (a, b) { return a.n - b.n; }).slice(0, 4).forEach(function (e) {
+            var li = document.createElement("li");
+            li.className = "upcoming-item" + (e.n <= 7 ? " soon" : "");
+            li.style.setProperty("--c", e.c);
+            var s = fmt.format(e.d);
+            li.innerHTML = '<div class="upcoming-when"></div><div class="upcoming-what"></div><div class="upcoming-date"></div>';
+            li.children[0].textContent = dans(e.n);
+            li.children[1].textContent = e.quoi;
+            li.children[2].textContent = s.charAt(0).toUpperCase() + s.slice(1) + (e.d.getFullYear() !== auj.getFullYear() ? " " + e.d.getFullYear() : "");
+            liste.appendChild(li);
+        });
+        if (!aVenir.length) document.getElementById("echeances").classList.add("is-hidden");
+
+        /* ---------- Recherche et filtres ---------- */
+        var champ = document.getElementById("recherche");
+        var cartes = Array.prototype.slice.call(document.querySelectorAll(".card"));
+        var aucun = document.getElementById("aucun");
+        var placesMin = document.getElementById("places-min");
+        var nbSalles = document.getElementById("nb-salles");
+        var filtre = "tout";
+
+        function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+
+        /* Garde le texte d'origine de chaque élément cherchable, pour retirer le surlignage. */
+        var items = document.querySelectorAll(".link-label, .date-list li > .d, .tips li, .room-name, .card h2");
+        items.forEach(function (el) { el.dataset.orig = el.innerHTML; });
+
+        function surligner(el, mots) {
+            el.innerHTML = el.dataset.orig;
+            if (!mots.length) return;
+            var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            var noeuds = [];
+            while (walker.nextNode()) noeuds.push(walker.currentNode);
+            noeuds.forEach(function (t) {
+                var txt = t.nodeValue, n = norm(txt), plages = [];
+                mots.forEach(function (m) {
+                    var i = n.indexOf(m);
+                    while (i !== -1) { plages.push([i, i + m.length]); i = n.indexOf(m, i + m.length); }
+                });
+                if (!plages.length) return;
+                plages.sort(function (a, b) { return a[0] - b[0]; });
+                var frag = document.createDocumentFragment(), pos = 0;
+                plages.forEach(function (p) {
+                    if (p[0] < pos) return;
+                    frag.appendChild(document.createTextNode(txt.slice(pos, p[0])));
+                    var mk = document.createElement("mark");
+                    mk.textContent = txt.slice(p[0], p[1]);
+                    frag.appendChild(mk);
+                    pos = p[1];
+                });
+                frag.appendChild(document.createTextNode(txt.slice(pos)));
+                t.parentNode.replaceChild(frag, t);
+            });
+        }
+
+        function appliquer() {
+            var mots = norm(champ.value.trim()).split(/\s+/).filter(Boolean);
+            var min = parseInt(placesMin.value, 10) || 0;
+            var visibles = 0;
+
+            items.forEach(function (el) { surligner(el, mots); });
+
+            cartes.forEach(function (carte) {
+                var okCat = filtre === "tout" || carte.dataset.cat === filtre;
+                var titre = norm(carte.querySelector(".card-header").textContent);
+                var titreOk = mots.length && mots.every(function (m) { return titre.indexOf(m) !== -1; });
+                var lignes = carte.querySelectorAll(".link-list li, .date-list li, .tips li, .room");
+                var nb = 0;
+                lignes.forEach(function (li) {
+                    var t = norm(li.textContent);
+                    var ok = !mots.length || titreOk || mots.every(function (m) { return t.indexOf(m) !== -1; });
+                    if (li.classList.contains("room") && min && +li.dataset.places < min) ok = false;
+                    li.classList.toggle("is-hidden", !ok);
+                    if (ok) nb++;
+                });
+                carte.querySelectorAll(".info-label, .field-help").forEach(function (el) {
+                    el.classList.toggle("is-hidden", mots.length > 0 && !titreOk);
+                });
+                carte.querySelectorAll(".room-cols > div").forEach(function (col) {
+                    col.classList.toggle("is-hidden", !col.querySelector(".room:not(.is-hidden)"));
+                });
+                var montrer = okCat && (nb > 0 || titreOk || (!mots.length && !lignes.length));
+                carte.classList.toggle("is-hidden", !montrer);
+                if (montrer) visibles++;
+            });
+
+            var salles = document.querySelectorAll(".room:not(.is-hidden)").length;
+            nbSalles.textContent = salles + (salles > 1 ? " salles" : " salle");
+            aucun.classList.toggle("show", visibles === 0);
+        }
+
+        document.querySelectorAll(".chip").forEach(function (b) {
+            b.addEventListener("click", function () {
+                filtre = b.dataset.filtre;
+                document.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+                appliquer();
+            });
+        });
+        champ.addEventListener("input", appliquer);
+        placesMin.addEventListener("input", appliquer);
+        champ.addEventListener("keydown", function (e) { if (e.key === "Escape") { champ.value = ""; appliquer(); } });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "/" && document.activeElement !== champ && !/input|textarea/i.test(document.activeElement.tagName)) {
+                e.preventDefault(); champ.focus();
+            }
+        });
+        appliquer();
+    })();
+    </script>
 
 </body>
 </html>
