@@ -646,9 +646,14 @@
             m.className = 'msg ok';
             m.innerHTML = 'PDF générés, une page par étudiant :<ul>' + files.map((f) =>
                 `<li><a href="${f.url}" download="${esc(f.name)}">${esc(f.name)}</a> — ${esc(f.label)}, ${f.n} fiche(s)</li>`).join('') + '</ul>';
-            // Téléchargement automatique du premier fichier ; les autres restent en liens
-            // (les navigateurs bloquent souvent plusieurs téléchargements d'un coup).
-            m.querySelector('a').click();
+            // Téléchargement automatique de chaque fichier, un à la fois. Les liens restent
+            // affichés au cas où le navigateur bloquerait le deuxième téléchargement.
+            const links = [...m.querySelectorAll('a')];
+            for (let i = 0; i < links.length; i++) {
+                if (i) await new Promise((r) => setTimeout(r, 800));
+                links[i].click();
+            }
+            if (links.length > 1) m.insertAdjacentHTML('beforeend', '<p class="hint">Si un seul fichier s’est téléchargé, ton navigateur a bloqué le deuxième : clique sur son lien ci-dessus (ou autorise les téléchargements multiples pour ce site).</p>');
         } catch (err) {
             m.className = 'msg err';
             m.textContent = 'Erreur pendant la génération : ' + err.message;
