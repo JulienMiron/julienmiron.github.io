@@ -157,7 +157,7 @@
     <header class="app-hero">
         <p class="app-eyebrow">Outil · Examens</p>
         <h1>Fiches de reprise d’examen facultaire</h1>
-        <p class="subtitle">Prépare la fiche « Reprise d’examen facultaire » à joindre à chaque enveloppe : une page par étudiant, au format officiel de la FSG. Les consignes se saisissent une fois par cours et sont appliquées à tous ses étudiants.</p>
+        <p class="subtitle">Prépare la fiche « Reprise d’examen facultaire » à joindre à chaque enveloppe : une page par étudiant, au format officiel de la FSG. Les étudiants du parcours département reçoivent plutôt une fiche « Reprise DMS », dans un PDF à part. Les consignes se saisissent une fois par cours et sont appliquées à tous ses étudiants.</p>
         <p class="privacy">Tout se fait dans le navigateur : le fichier des étudiants n’est envoyé nulle part.</p>
     </header>
 
@@ -181,7 +181,7 @@
                 <span class="field-label">Parcours</span>
                 <div class="check-row" id="parcoursFilter">
                     <label><input type="checkbox" value="facultaire" checked> Facultaire</label>
-                    <label><input type="checkbox" value="departement"> Département</label>
+                    <label><input type="checkbox" value="departement" checked> Département (fiche DMS)</label>
                     <label><input type="checkbox" value="sse"> SSE</label>
                 </div>
             </div>
@@ -230,7 +230,7 @@
         </div>
     </section>
 
-    <button type="button" class="big-btn" id="generateBtn" disabled>Générer le PDF des fiches</button>
+    <button type="button" class="big-btn" id="generateBtn" disabled>Générer les PDF des fiches</button>
     <div id="genMsg" class="msg" aria-live="polite"></div>
 </div>
 
@@ -281,7 +281,7 @@
     const STORE_KEY = 'repriseFacultaire.v1';
 
     const $ = (id) => document.getElementById(id);
-    const norm = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const norm = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
     const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
     // ===== Mémoire locale (préférences seulement, jamais les étudiants) =====
@@ -555,15 +555,21 @@
     function render() { renderTable(); renderCourses(); updateButton(); }
 
     // ===== PDF =====
-    let templateBytes = null;
-    async function getTemplate() {
-        if (!templateBytes) {
-            const res = await fetch('gabarit_reprise_facultaire.pdf');
-            if (!res.ok) throw new Error('gabarit introuvable');
-            templateBytes = await res.arrayBuffer();
+    // Deux gabarits : fiche FSG (reprise facultaire) et fiche DMS (parcours « département »).
+    const TEMPLATES = {
+        facultaire: { file: 'gabarit_reprise_facultaire.pdf', title: 'Reprise d’examen facultaire', name: 'Reprise_examen_facultaire' },
+        dms: { file: 'gabarit_reprise_dms.pdf', title: 'Reprise DMS', name: 'Reprise_DMS' }
+    };
+    const templateCache = {};
+    async function getTemplate(kind) {
+        if (!templateCache[kind]) {
+            const res = await fetch(TEMPLATES[kind].file);
+            if (!res.ok) throw new Error('gabarit introuvable (' + TEMPLATES[kind].file + ')');
+            templateCache[kind] = await res.arrayBuffer();
         }
-        return templateBytes;
+        return templateCache[kind];
     }
+    const kindOf = (s) => (s.parcours === 'departement' ? 'dms' : 'facultaire');
     function duree(c) {
         const h = parseInt(c.heures, 10) || 0, m = parseInt(c.minutes, 10) || 0;
         if (!h && !m) return '';
@@ -571,70 +577,83 @@
         return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
     }
 
+    async function buildPdf(kind, list) {
+        const { PDFDocument, StandardFonts } = PDFLib;
+        const bytes = await getTemplate(kind);
+        const out = await PDFDocument.create();
+        out.setTitle(TEMPLATES[kind].title);
+        out.setAuthor(contact.nom || '');
+        for (const s of list) {
+            const doc = await PDFDocument.load(bytes);
+            const form = doc.getForm(); const page = doc.getPage(0);
+            const rect = {};
+            for (const f of form.getFields()) rect[norm(f.getName())] = f.acroField.getWidgets()[0].getRectangle();
+            for (const f of form.getFields()) form.removeField(f);
+            const font = await doc.embedFont(StandardFonts.Helvetica);
+            const safe = (t) => [...String(t)].map((ch) => { try { font.encodeText(ch); return ch; } catch (e) {
+                const base = ch.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); try { font.encodeText(base); return base; } catch (e2) { return '?'; } } }).join('');
+            const text = (k, v) => {
+                if (!v) return; const r = rect[k]; if (!r) return;
+                const t = safe(v); let size = 11; const maxW = r.width - 6;
+                while (size > 7 && font.widthOfTextAtSize(t, size) > maxW) size -= 0.5;
+                page.drawText(t, { x: r.x + 3, y: r.y + 5, size, font });
+            };
+            const check = (k) => {
+                const r = rect[k]; if (!r) return;
+                const sz = Math.min(r.width, r.height), x = r.x + (r.width - sz) / 2, y = r.y + (r.height - sz) / 2, i = sz * 0.18;
+                page.drawLine({ start: { x: x + i, y: y + i }, end: { x: x + sz - i, y: y + sz - i }, thickness: 1.4 });
+                page.drawLine({ start: { x: x + i, y: y + sz - i }, end: { x: x + sz - i, y: y + i }, thickness: 1.4 });
+            };
+            const c = courseSettings[keyOf(s)] || defaultSettings(s);
+            text(PDF_TEXT.nom, s.nom);
+            text(PDF_TEXT.ni, s.ni);
+            text(PDF_TEXT.cours, c.sigleTitre);
+            text(PDF_TEXT.duree, duree(c));
+            if (c.calc === 'oui') check('oui');
+            if (c.calc === 'non') check('non');
+            (c.docs || []).forEach((d) => check(PDF_CHECK_DOCS[d]));
+            if ((c.docs || []).includes('autre')) text(PDF_TEXT.autreDoc, c.autreDoc);
+            (c.env || []).forEach((d) => check(PDF_CHECK_ENV[d]));
+            if ((c.env || []).includes('autre')) text(PDF_TEXT.autreEnv, c.autreEnv);
+            text(PDF_TEXT.consignes, c.consignes);
+            text(PDF_TEXT.contact, contact.nom);
+            if (contact.teams) check('teams');
+            if (contact.cell) { check('cellulaire'); text(PDF_TEXT.cell, contact.cellNum); }
+            text(PDF_TEXT.courriel, contact.courriel);
+            const [copied] = await out.copyPages(doc, [0]);
+            out.addPage(copied);
+        }
+        return new Blob([await out.save()], { type: 'application/pdf' });
+    }
+
+    let lastUrls = [];
     async function generate() {
         const p = problems();
         if (p.length && !confirm('Certains champs sont incomplets :\n\n• ' + p.join('\n• ') + '\n\nGénérer quand même?')) return;
         const btn = $('generateBtn'); btn.disabled = true; btn.textContent = 'Génération…';
+        const m = $('genMsg');
         try {
-            const { PDFDocument, StandardFonts } = PDFLib;
-            const bytes = await getTemplate();
-            const out = await PDFDocument.create();
-            out.setTitle('Reprise d’examen facultaire');
-            out.setAuthor(contact.nom || '');
-            for (const s of selected()) {
-                const doc = await PDFDocument.load(bytes);
-                const form = doc.getForm(); const page = doc.getPage(0);
-                const rect = {};
-                for (const f of form.getFields()) rect[norm(f.getName())] = f.acroField.getWidgets()[0].getRectangle();
-                for (const f of form.getFields()) form.removeField(f);
-                const font = await doc.embedFont(StandardFonts.Helvetica);
-                const safe = (t) => [...String(t)].map((ch) => { try { font.encodeText(ch); return ch; } catch (e) {
-                    const base = ch.normalize('NFD').replace(/[̀-ͯ]/g, ''); try { font.encodeText(base); return base; } catch (e2) { return '?'; } } }).join('');
-                const text = (k, v) => {
-                    if (!v) return; const r = rect[k]; if (!r) return;
-                    const t = safe(v); let size = 11; const maxW = r.width - 6;
-                    while (size > 7 && font.widthOfTextAtSize(t, size) > maxW) size -= 0.5;
-                    page.drawText(t, { x: r.x + 3, y: r.y + 5, size, font });
-                };
-                const check = (k) => {
-                    const r = rect[k]; if (!r) return;
-                    const sz = Math.min(r.width, r.height), x = r.x + (r.width - sz) / 2, y = r.y + (r.height - sz) / 2, i = sz * 0.18;
-                    page.drawLine({ start: { x: x + i, y: y + i }, end: { x: x + sz - i, y: y + sz - i }, thickness: 1.4 });
-                    page.drawLine({ start: { x: x + i, y: y + sz - i }, end: { x: x + sz - i, y: y + i }, thickness: 1.4 });
-                };
-                const c = courseSettings[keyOf(s)] || defaultSettings(s);
-                text(PDF_TEXT.nom, s.nom);
-                text(PDF_TEXT.ni, s.ni);
-                text(PDF_TEXT.cours, c.sigleTitre);
-                text(PDF_TEXT.duree, duree(c));
-                if (c.calc === 'oui') check('oui');
-                if (c.calc === 'non') check('non');
-                (c.docs || []).forEach((d) => check(PDF_CHECK_DOCS[d]));
-                if ((c.docs || []).includes('autre')) text(PDF_TEXT.autreDoc, c.autreDoc);
-                (c.env || []).forEach((d) => check(PDF_CHECK_ENV[d]));
-                if ((c.env || []).includes('autre')) text(PDF_TEXT.autreEnv, c.autreEnv);
-                text(PDF_TEXT.consignes, c.consignes);
-                text(PDF_TEXT.contact, contact.nom);
-                if (contact.teams) check('teams');
-                if (contact.cell) { check('cellulaire'); text(PDF_TEXT.cell, contact.cellNum); }
-                text(PDF_TEXT.courriel, contact.courriel);
-                const [copied] = await out.copyPages(doc, [0]);
-                out.addPage(copied);
-            }
-            const blob = new Blob([await out.save()], { type: 'application/pdf' });
+            lastUrls.forEach((u) => URL.revokeObjectURL(u)); lastUrls = [];
             const date = $('sessionSelect').value;
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `Reprise_examen_facultaire${date ? '_' + date : ''}.pdf`;
-            document.body.appendChild(a); a.click(); a.remove();
-            setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-            const m = $('genMsg'); m.className = 'msg ok';
-            m.textContent = `PDF généré : ${selected().length} fiche(s), une page par étudiant.`;
+            const files = [];
+            for (const kind of ['facultaire', 'dms']) {
+                const list = selected().filter((s) => kindOf(s) === kind);
+                if (!list.length) continue;
+                const url = URL.createObjectURL(await buildPdf(kind, list));
+                lastUrls.push(url);
+                files.push({ url, n: list.length, name: `${TEMPLATES[kind].name}${date ? '_' + date : ''}.pdf`, label: TEMPLATES[kind].title });
+            }
+            m.className = 'msg ok';
+            m.innerHTML = 'PDF générés, une page par étudiant :<ul>' + files.map((f) =>
+                `<li><a href="${f.url}" download="${esc(f.name)}">${esc(f.name)}</a> — ${esc(f.label)}, ${f.n} fiche(s)</li>`).join('') + '</ul>';
+            // Téléchargement automatique du premier fichier ; les autres restent en liens
+            // (les navigateurs bloquent souvent plusieurs téléchargements d'un coup).
+            m.querySelector('a').click();
         } catch (err) {
-            const m = $('genMsg'); m.className = 'msg err';
+            m.className = 'msg err';
             m.textContent = 'Erreur pendant la génération : ' + err.message;
         } finally {
-            btn.textContent = 'Générer le PDF des fiches'; btn.disabled = !selected().length;
+            btn.textContent = 'Générer les PDF des fiches'; btn.disabled = !selected().length;
         }
     }
     $('generateBtn').addEventListener('click', generate);
