@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fiches de reprise facultaire</title>
+    <link rel="icon" href="../../img/logo.png">
+    <!-- Bibliothèque à version fixe, avec empreinte d'intégrité : le navigateur refuse tout script modifié -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js" integrity="sha384-weMABwrltA6jWR8DDe9Jp5blk+tZQh7ugpCsF3JwSA53WZM9/14PjS5LAJNHNjAI" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../shared/site-navbar.css">
+    <script src="../shared/site-navbar.js" defer></script>
+    <style>
+        :root {
+            /* ===== Couleurs : modifier ici pour changer toute la page ===== */
+            --color-primary: #9467bd;            /* boutons, bordures des champs, numéros d'étape, bande de l'en-tête */
+            --color-primary-dark: #735093;       /* survol, focus, titres de cours */
+            --color-primary-bg: #f5f1fa;         /* fond des champs et de l'en-tête */
+            --color-primary-bg-hover: #ece2f4;   /* fond des champs au survol, en-têtes du tableau */
+            --color-primary-border: #d9c9e8;     /* bordure des blocs de cours */
+            --color-focus-ring: rgba(115, 80, 147, 0.2);
+
+            --color-page-bg: #f6f7f9;
+            --color-surface: #ffffff;
+            --color-on-primary: #ffffff;
+
+            --color-text: #202124;
+            --color-text-secondary: #555555;
+            --color-text-muted: #666666;
+            --color-text-faint: #888888;
+
+            --color-border: #d9d9d9;
+            --color-divider: #e4dced;
+            --color-disabled: #cccccc;
+
+            --color-success: #1e7e34;
+            --color-warning: #b26a00;
+            --color-danger: #c62828;
+
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+            --radius: 4px;
+            --site-navbar-body-pad: 28px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            color: var(--color-text);
+            line-height: 1.5;
+            background: var(--color-page-bg);
+            min-height: 100vh;
+            padding: 0 16px 48px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .app-hero {
+            border-left: 6px solid var(--color-primary);
+            background: linear-gradient(90deg, var(--color-primary-bg) 0%, var(--color-surface) 55%, var(--color-page-bg) 100%);
+            padding: 1.3rem 1.5rem;
+            margin: 1rem 0 1.5rem;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+        .app-eyebrow {
+            text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-primary);
+            font-size: 0.78rem; font-weight: 700; margin-bottom: 0.35rem;
+        }
+        h1 { font-size: 26px; margin: 0.2rem 0 0.5rem; text-wrap: balance; }
+        .subtitle { color: var(--color-text-muted); font-size: 1.02rem; max-width: 72ch; }
+        .privacy { margin-top: 0.6rem; font-size: 13px; color: var(--color-text-faint); }
+
+        .step-card {
+            border: 1px solid var(--color-border); border-radius: var(--radius);
+            padding: 20px; margin-bottom: 22px; background: var(--color-surface); box-shadow: var(--shadow-sm);
+        }
+        .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .step-badge {
+            flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+            background: var(--color-primary); color: var(--color-on-primary);
+            display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700;
+        }
+        .step-title { font-size: 17px; font-weight: 700; }
+        .step-desc { color: var(--color-text-muted); font-size: 14px; margin: 0 0 16px 36px; max-width: 75ch; }
+
+        .field-label { display: block; color: var(--color-text-secondary); font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+        .opt { font-weight: 400; color: var(--color-text-faint); }
+        input[type="text"], input[type="number"], input[type="email"], input[type="tel"], select {
+            width: 100%; padding: 10px 12px; border: 2px solid var(--color-primary); border-radius: var(--radius);
+            background: var(--color-primary-bg); font-size: 14px; color: var(--color-text); font-family: inherit;
+        }
+        input:hover, select:hover { background: var(--color-primary-bg-hover); }
+        input:focus, select:focus { outline: none; border-color: var(--color-primary-dark); box-shadow: 0 0 0 3px var(--color-focus-ring); }
+        input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--color-primary-dark); flex-shrink: 0; }
+
+        .grid { display: grid; gap: 14px; }
+        .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .span-2 { grid-column: span 2; }
+        @media (max-width: 760px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } .span-2 { grid-column: auto; } }
+
+        button {
+            padding: 10px 16px; background: var(--color-primary); color: var(--color-on-primary);
+            border: 1px solid var(--color-primary); border-radius: var(--radius);
+            font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+        }
+        button:hover:not(:disabled) { filter: brightness(0.95); }
+        button:disabled { background: var(--color-disabled); border-color: var(--color-disabled); cursor: not-allowed; }
+        button.secondary { background: var(--color-surface); color: var(--color-primary-dark); }
+        button.link { background: none; border: none; color: var(--color-danger); padding: 2px 6px; font-weight: 400; font-size: 18px; line-height: 1; }
+        .big-btn { width: 100%; padding: 14px; font-size: 16px; }
+
+        .file-drop {
+            border: 2px dashed var(--color-primary); border-radius: var(--radius); background: var(--color-primary-bg);
+            padding: 18px; text-align: center; cursor: pointer; color: var(--color-text-muted); font-size: 14px;
+        }
+        .file-drop:hover, .file-drop.drag { background: var(--color-primary-bg-hover); border-color: var(--color-primary-dark); }
+        #csvFile { display: none; }
+
+        .toolbar { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin: 16px 0 12px; }
+        .toolbar > div { min-width: 180px; }
+        .check-row { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; }
+        .check-row label, .check-list label { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+
+        .table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius); }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--color-divider); white-space: nowrap; }
+        th { background: var(--color-primary-bg-hover); font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-primary-dark); }
+        td.num { font-variant-numeric: tabular-nums; }
+        tr.excluded td { color: var(--color-text-faint); }
+        tr:last-child td { border-bottom: none; }
+        .empty { padding: 18px; text-align: center; color: var(--color-text-faint); font-size: 14px; }
+        .count { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; background: var(--color-primary-bg-hover); color: var(--color-primary-dark); font-size: 13px; font-weight: 700; }
+
+        details.add-student { margin-top: 12px; font-size: 14px; }
+        details.add-student summary { cursor: pointer; color: var(--color-primary-dark); font-weight: 600; padding: 4px 0; }
+        .add-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; margin-top: 10px; }
+        @media (max-width: 760px) { .add-grid { grid-template-columns: 1fr; } }
+
+        .course-block { border: 1px solid var(--color-primary-border); border-radius: var(--radius); padding: 16px; margin-top: 14px; }
+        .course-block h3 { font-size: 16px; color: var(--color-primary-dark); margin-bottom: 12px; }
+        .course-block h3 small { font-weight: 400; color: var(--color-text-muted); font-size: 13px; }
+        .sub-label { font-size: 13px; font-weight: 700; color: var(--color-text-secondary); margin: 14px 0 6px; }
+        .check-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 20px; font-size: 14px; }
+        @media (max-width: 760px) { .check-list { grid-template-columns: 1fr; } }
+        .check-list .other { display: flex; align-items: center; gap: 8px; }
+        .check-list .other input[type="text"] { padding: 6px 8px; }
+
+        .msg { margin-top: 12px; font-size: 14px; }
+        .msg.ok { color: var(--color-success); }
+        .msg.warn { color: var(--color-warning); }
+        .msg.err { color: var(--color-danger); }
+        .msg ul { margin: 4px 0 0 20px; }
+        .hint { font-size: 13px; color: var(--color-text-muted); margin-top: 6px; }
+        code { background: var(--color-page-bg); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="app-hero">
+        <p class="app-eyebrow">Outil · Examens</p>
+        <h1>Fiches de reprise d’examen facultaire</h1>
+        <p class="subtitle">Prépare la fiche « Reprise d’examen facultaire » à joindre à chaque enveloppe : une page par étudiant, au format officiel de la FSG. Les consignes se saisissent une fois par cours et sont appliquées à tous ses étudiants.</p>
+        <p class="privacy">Tout se fait dans le navigateur : le fichier des étudiants n’est envoyé nulle part.</p>
+    </header>
+
+    <!-- Étape 1 -->
+    <section class="step-card" aria-labelledby="t1">
+        <div class="step-header"><span class="step-badge">1</span><h2 class="step-title" id="t1">Étudiants</h2></div>
+        <p class="step-desc">Importe le fichier <code>reprises_A26.csv</code> préparé chaque matin (OneDrive, dossier <em>1-Enseignement/Reprises</em>), puis choisis la séance. Un CSV simple fonctionne aussi : nom en colonne 1, NI en colonne 2, séparateur <code>;</code> ou <code>,</code>.</p>
+
+        <div class="file-drop" id="fileDrop" role="button" tabindex="0" aria-label="Choisir un fichier CSV">
+            Cliquer ou glisser-déposer le fichier <strong>CSV des reprises</strong> ici
+        </div>
+        <input type="file" id="csvFile" accept=".csv,.txt,text/csv">
+        <div id="importMsg" class="msg" aria-live="polite"></div>
+
+        <div class="toolbar">
+            <div>
+                <label class="field-label" for="sessionSelect">Séance de reprise</label>
+                <select id="sessionSelect"><option value="">Toutes les dates</option></select>
+            </div>
+            <div>
+                <span class="field-label">Parcours</span>
+                <div class="check-row" id="parcoursFilter">
+                    <label><input type="checkbox" value="facultaire" checked> Facultaire</label>
+                    <label><input type="checkbox" value="departement"> Département</label>
+                    <label><input type="checkbox" value="sse"> SSE</label>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="font-size:15px;margin-bottom:8px">Fiches à produire <span class="count" id="countBadge">0</span></h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th></th><th>Nom et prénom</th><th>NI</th><th>Cours</th><th>Évaluation</th><th>Date</th><th>Local</th><th></th></tr></thead>
+                <tbody id="studentBody"></tbody>
+            </table>
+            <div class="empty" id="emptyMsg">Aucun étudiant pour l’instant. Importe le CSV ou ajoute un étudiant à la main.</div>
+        </div>
+
+        <details class="add-student">
+            <summary>+ Ajouter un étudiant à la main</summary>
+            <div class="add-grid">
+                <div><label class="field-label" for="addNom">Nom et prénom</label><input type="text" id="addNom"></div>
+                <div><label class="field-label" for="addNi">NI</label><input type="text" id="addNi" inputmode="numeric"></div>
+                <div><label class="field-label" for="addCours">Cours</label><input type="text" id="addCours" placeholder="STT-1000"></div>
+                <div><label class="field-label" for="addEval">Évaluation</label><input type="text" id="addEval" placeholder="Examen 1"></div>
+                <button type="button" id="addBtn">Ajouter</button>
+            </div>
+        </details>
+    </section>
+
+    <!-- Étape 2 -->
+    <section class="step-card" aria-labelledby="t2">
+        <div class="step-header"><span class="step-badge">2</span><h2 class="step-title" id="t2">Consignes par cours</h2></div>
+        <p class="step-desc">Un bloc par cours et par évaluation présents dans la liste. Les choix sont retenus dans ce navigateur pour la prochaine séance.</p>
+        <div id="courseBlocks"><div class="empty">Les cours apparaîtront ici une fois les étudiants ajoutés.</div></div>
+    </section>
+
+    <!-- Étape 3 -->
+    <section class="step-card" aria-labelledby="t3">
+        <div class="step-header"><span class="step-badge">3</span><h2 class="step-title" id="t3">Personne joignable pendant l’examen</h2></div>
+        <p class="step-desc">Imprimé au bas de chaque fiche.</p>
+        <div class="grid grid-2">
+            <div><label class="field-label" for="contactNom">Nom de la personne désignée</label><input type="text" id="contactNom"></div>
+            <div><label class="field-label" for="contactCourriel">Courriel</label><input type="email" id="contactCourriel"></div>
+        </div>
+        <div class="toolbar" style="margin-bottom:0">
+            <div class="check-row"><label><input type="checkbox" id="contactTeams"> Teams</label></div>
+            <div class="check-row"><label><input type="checkbox" id="contactCell"> Cellulaire</label></div>
+            <div><label class="field-label" for="contactCellNum">Numéro de cellulaire <span class="opt">(facultatif)</span></label><input type="tel" id="contactCellNum"></div>
+        </div>
+    </section>
+
+    <button type="button" class="big-btn" id="generateBtn" disabled>Générer le PDF des fiches</button>
+    <div id="genMsg" class="msg" aria-live="polite"></div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ===== Titres officiels (modifiables dans la page) =====
+    const COURSE_TITLES = {
+        'STT-1000': 'Probabilités et statistique',
+        'STT-1900': 'Méthodes statistiques pour ingénieurs',
+        'STT-1920': 'Méthodes statistiques',
+        'STT-2902': 'Modélisation statistique',
+        'STT-4300': 'Régression II',
+        'STT-7360': 'Méthodes biostatistiques'
+    };
+    const DOCS = [
+        ['recto', 'Aide-mémoire manuscrite 8½x11 recto'],
+        ['rectoverso', 'Aide-mémoire manuscrite 8½x11 recto-verso'],
+        ['formules', 'Feuille de formules'],
+        ['notescours', 'Notes de cours'],
+        ['notesfournie', 'Feuille de notes fournie'],
+        ['aucun', 'Aucun document'],
+        ['tout', 'Tout document']
+    ];
+    const ENVELOPPE = [
+        ['reponse', 'Feuille réponse (lecteur optique)'],
+        ['cahier', 'Cahier d’examen (cahier bleu)'],
+        ['formules', 'Feuille de formules'],
+        ['enonce', 'Énoncé d’examen'],
+        ['notesfournie', 'Feuille de notes fournie']
+    ];
+    // Champs du gabarit PDF (nom normalisé du champ AcroForm)
+    const PDF_TEXT = {
+        nom: 'nometprenomdelapersonneetudiante', ni: 'fill2', cours: 'sigleettitreducours', duree: 'dureedelexamen',
+        autreDoc: 'autresdocumentsautorises', autreEnv: 'autresdocuments', consignes: 'autresconsignes',
+        contact: 'nomdelapersonnedesigneepouretrejoignablependantlexamen', cell: 'numerodecellulaire', courriel: 'courriel'
+    };
+    const PDF_CHECK_DOCS = {
+        recto: 'aidememoiremanuscrite8x11recto', rectoverso: 'aidememoiremanuscrite8x11rectoverso',
+        formules: 'feuilledeformules', notescours: 'notesdecours', notesfournie: 'feuilledenotesfournie',
+        aucun: 'aucundocument', tout: 'toutdocument', autre: 'autre'
+    };
+    const PDF_CHECK_ENV = {
+        reponse: 'feuillereponse', cahier: 'cahierdexamencahierbleu', formules: 'feuilledeformules2',
+        enonce: 'enoncedexamen', notesfournie: 'feuilledenotesfournie2', autre: 'autre2'
+    };
+    const STORE_KEY = 'repriseFacultaire.v1';
+
+    const $ = (id) => document.getElementById(id);
+    const norm = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    // ===== Mémoire locale (préférences seulement, jamais les étudiants) =====
+    let store = { courses: {}, contact: {} };
+    try { store = Object.assign(store, JSON.parse(localStorage.getItem(STORE_KEY) || '{}')); } catch (e) { /* stockage indisponible */ }
+    function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { /* ignoré */ } }
+
+    // ===== État =====
+    let students = [];      // {id, nom, ni, cours, titre, evaluation, parcours, date, heure, lieu, include}
+    let nextId = 1;
+    const courseSettings = {}; // clé "STT-1000|Examen 1" -> réglages
+
+    // ===== CSV =====
+    function parseCSV(text) {
+        text = text.replace(/^﻿/, '');
+        const firstLine = text.split(/\r?\n/)[0] || '';
+        const sep = (firstLine.split(';').length >= firstLine.split(',').length) ? ';' : ',';
+        const rows = []; let row = [], field = '', q = false;
+        for (let i = 0; i < text.length; i++) {
+            const c = text[i];
+            if (q) {
+                if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; }
+                else field += c;
+            } else if (c === '"') q = true;
+            else if (c === sep) { row.push(field); field = ''; }
+            else if (c === '\n' || c === '\r') {
+                if (c === '\r' && text[i + 1] === '\n') i++;
+                row.push(field); field = ''; rows.push(row); row = [];
+            } else field += c;
+        }
+        if (field !== '' || row.length) { row.push(field); rows.push(row); }
+        return rows.map((r) => r.map((x) => x.trim())).filter((r) => r.some((x) => x !== ''));
+    }
+
+    const HEADER_ALIASES = {
+        nom: ['nom', 'nometprenom', 'etudiant', 'etudiante', 'name', 'nomprenom'],
+        ni: ['ni', 'matricule', 'numerodidentification', 'idul', 'id'],
+        cours: ['cours', 'sigle'],
+        titre: ['titrecours', 'titre'],
+        nrc: ['nrc'],
+        evaluation: ['evaluation', 'examen'],
+        parcours: ['parcours'],
+        date: ['datereprise', 'date'],
+        heure: ['heure'],
+        lieu: ['lieu', 'local']
+    };
+
+    function importRows(rows) {
+        if (!rows.length) return { added: 0, skipped: 0 };
+        const header = rows[0].map(norm);
+        const col = {};
+        for (const [k, aliases] of Object.entries(HEADER_ALIASES)) {
+            const idx = header.findIndex((h) => aliases.includes(h));
+            if (idx >= 0) col[k] = idx;
+        }
+        const hasHeader = col.nom !== undefined || col.ni !== undefined;
+        if (!hasHeader) { col.nom = 0; col.ni = 1; }
+        const data = hasHeader ? rows.slice(1) : rows;
+        let added = 0, skipped = 0;
+        for (const r of data) {
+            const get = (k) => (col[k] !== undefined ? (r[col[k]] || '') : '');
+            const nom = get('nom'), ni = get('ni').replace(/\s/g, '');
+            if (!nom && !ni) continue;
+            const cours = get('cours').toUpperCase();
+            const evaluation = get('evaluation');
+            if (students.some((s) => s.ni && s.ni === ni && s.cours === cours && s.evaluation === evaluation)) { skipped++; continue; }
+            students.push({
+                id: nextId++, nom, ni, cours, titre: get('titre'), evaluation,
+                parcours: (get('parcours') || 'facultaire').toLowerCase(),
+                date: get('date'), heure: get('heure'), lieu: get('lieu'), include: true
+            });
+            added++;
+        }
+        return { added, skipped };
+    }
+
+    function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const res = importRows(parseCSV(reader.result));
+            const msg = $('importMsg');
+            msg.className = 'msg ' + (res.added ? 'ok' : 'warn');
+            msg.textContent = `${file.name} : ${res.added} étudiant(s) ajouté(s)` + (res.skipped ? `, ${res.skipped} déjà présent(s) ignoré(s).` : '.');
+            refreshSessions(true);
+            render();
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
+
+    const drop = $('fileDrop'), input = $('csvFile');
+    drop.addEventListener('click', () => input.click());
+    drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+    input.addEventListener('change', () => { if (input.files[0]) handleFile(input.files[0]); input.value = ''; });
+    ['dragenter', 'dragover'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('drag'); }));
+    ['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('drag'); }));
+    drop.addEventListener('drop', (e) => { if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+
+    // ===== Séances =====
+    function fmtDate(iso) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso || '';
+        const d = new Date(iso + 'T12:00:00');
+        return d.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    function todayISO() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+    function refreshSessions(pickNext) {
+        const sel = $('sessionSelect'), current = sel.value;
+        const dates = [...new Set(students.map((s) => s.date).filter(Boolean))].sort();
+        sel.innerHTML = '<option value="">Toutes les dates</option>' +
+            dates.map((d) => `<option value="${esc(d)}">${esc(fmtDate(d))}</option>`).join('');
+        if (pickNext) {
+            const next = dates.find((d) => d >= todayISO());
+            sel.value = next || '';
+        } else if (dates.includes(current)) sel.value = current;
+    }
+    $('sessionSelect').addEventListener('change', render);
+    $('parcoursFilter').addEventListener('change', render);
+
+    function visibleStudents() {
+        const date = $('sessionSelect').value;
+        const parcours = [...document.querySelectorAll('#parcoursFilter input:checked')].map((x) => x.value);
+        return students
+            .filter((s) => (!date || !s.date || s.date === date) && (!s.parcours || parcours.includes(s.parcours)))
+            .sort((a, b) => (a.cours + a.evaluation).localeCompare(b.cours + b.evaluation, 'fr') || a.nom.localeCompare(b.nom, 'fr'));
+    }
+    const selected = () => visibleStudents().filter((s) => s.include);
+
+    // ===== Tableau =====
+    function renderTable() {
+        const list = visibleStudents();
+        $('studentBody').innerHTML = list.map((s) => `
+            <tr class="${s.include ? '' : 'excluded'}">
+                <td><input type="checkbox" data-inc="${s.id}" ${s.include ? 'checked' : ''} aria-label="Inclure ${esc(s.nom)}"></td>
+                <td>${esc(s.nom)}</td><td class="num">${esc(s.ni)}</td><td>${esc(s.cours)}</td><td>${esc(s.evaluation)}</td>
+                <td>${esc(s.date)}</td><td>${esc(s.lieu)}</td>
+                <td><button type="button" class="link" data-del="${s.id}" aria-label="Retirer ${esc(s.nom)}">×</button></td>
+            </tr>`).join('');
+        $('emptyMsg').style.display = list.length ? 'none' : 'block';
+        $('countBadge').textContent = selected().length;
+    }
+    $('studentBody').addEventListener('change', (e) => {
+        const id = +e.target.dataset.inc; const s = students.find((x) => x.id === id);
+        if (s) { s.include = e.target.checked; render(); }
+    });
+    $('studentBody').addEventListener('click', (e) => {
+        const id = +e.target.dataset.del;
+        if (id) { students = students.filter((x) => x.id !== id); refreshSessions(false); render(); }
+    });
+    $('addBtn').addEventListener('click', () => {
+        const nom = $('addNom').value.trim(), ni = $('addNi').value.trim();
+        if (!nom || !ni) { $('addNom').focus(); return; }
+        students.push({ id: nextId++, nom, ni, cours: $('addCours').value.trim().toUpperCase(), titre: '',
+            evaluation: $('addEval').value.trim(), parcours: '', date: '', heure: '', lieu: '', include: true });
+        ['addNom', 'addNi'].forEach((i) => { $(i).value = ''; });
+        $('addNom').focus();
+        render();
+    });
+
+    // ===== Consignes par cours =====
+    const keyOf = (s) => `${s.cours}|${s.evaluation}`;
+    function defaultSettings(s) {
+        const saved = store.courses[keyOf(s)] || store.courses[s.cours] || {};
+        const titre = s.titre || COURSE_TITLES[s.cours] || '';
+        return Object.assign({
+            sigleTitre: [s.cours, titre].filter(Boolean).join(' – '),
+            heures: '', minutes: '', calc: '', docs: [], autreDoc: '', env: [], autreEnv: '', consignes: ''
+        }, saved);
+    }
+    function checkList(prefix, items, chosen, autreVal, autreKey) {
+        return items.map(([k, label]) => `
+            <label><input type="checkbox" data-f="${prefix}" value="${k}" ${chosen.includes(k) ? 'checked' : ''}> ${esc(label)}</label>`).join('') +
+            `<div class="other"><label><input type="checkbox" data-f="${prefix}" value="autre" ${chosen.includes('autre') ? 'checked' : ''}> Autre&nbsp;:</label>
+             <input type="text" data-f="${autreKey}" value="${esc(autreVal)}" aria-label="Autre (préciser)"></div>`;
+    }
+    function renderCourses() {
+        const groups = [];
+        for (const s of selected()) if (!groups.some((g) => keyOf(g) === keyOf(s))) groups.push(s);
+        const box = $('courseBlocks');
+        if (!groups.length) { box.innerHTML = '<div class="empty">Les cours apparaîtront ici une fois les étudiants ajoutés.</div>'; return; }
+        box.innerHTML = groups.map((g) => {
+            const k = keyOf(g);
+            if (!courseSettings[k]) courseSettings[k] = defaultSettings(g);
+            const c = courseSettings[k];
+            const n = selected().filter((s) => keyOf(s) === k).length;
+            return `
+            <div class="course-block" data-key="${esc(k)}">
+                <h3>${esc(g.cours || 'Cours non précisé')} ${g.evaluation ? '· ' + esc(g.evaluation) : ''} <small>— ${n} fiche(s)</small></h3>
+                <div class="grid grid-4">
+                    <div class="span-2"><label class="field-label">Sigle et titre du cours</label><input type="text" data-f="sigleTitre" value="${esc(c.sigleTitre)}"></div>
+                    <div><label class="field-label">Durée (heures)</label><input type="number" min="0" max="12" data-f="heures" value="${esc(c.heures)}"></div>
+                    <div><label class="field-label">Minutes</label><input type="number" min="0" max="59" step="5" data-f="minutes" value="${esc(c.minutes)}"></div>
+                </div>
+                <div class="grid grid-2" style="margin-top:14px">
+                    <div><label class="field-label">Calculatrice autorisée</label>
+                        <select data-f="calc">
+                            <option value="" ${c.calc === '' ? 'selected' : ''}>Choisissez…</option>
+                            <option value="oui" ${c.calc === 'oui' ? 'selected' : ''}>Oui</option>
+                            <option value="non" ${c.calc === 'non' ? 'selected' : ''}>Non</option>
+                        </select></div>
+                    <div><label class="field-label">Autres consignes <span class="opt">(facultatif)</span></label><input type="text" data-f="consignes" value="${esc(c.consignes)}"></div>
+                </div>
+                <p class="sub-label">Documents autorisés</p>
+                <div class="check-list">${checkList('docs', DOCS, c.docs, c.autreDoc, 'autreDoc')}</div>
+                <p class="sub-label">Contenu de l’enveloppe</p>
+                <div class="check-list">${checkList('env', ENVELOPPE, c.env, c.autreEnv, 'autreEnv')}</div>
+            </div>`;
+        }).join('');
+    }
+    function onCourseInput(e) {
+        const block = e.target.closest('.course-block'); if (!block) return;
+        const k = block.dataset.key, c = courseSettings[k], f = e.target.dataset.f;
+        if (!f) return;
+        if (f === 'docs' || f === 'env') {
+            c[f] = [...block.querySelectorAll(`input[data-f="${f}"]:checked`)].map((x) => x.value);
+        } else {
+            c[f] = e.target.value;
+            if ((f === 'autreDoc' || f === 'autreEnv') && e.target.value.trim()) {
+                const list = f === 'autreDoc' ? 'docs' : 'env';
+                const box = block.querySelector(`input[data-f="${list}"][value="autre"]`);
+                if (!box.checked) { box.checked = true; c[list] = [...new Set([...c[list], 'autre'])]; }
+            }
+        }
+        store.courses[k] = c; save();
+        updateButton();
+    }
+    $('courseBlocks').addEventListener('input', onCourseInput);
+    $('courseBlocks').addEventListener('change', onCourseInput);
+
+    // ===== Personne joignable =====
+    const contactDefaults = { nom: 'Julien Miron', courriel: 'julien.miron@mat.ulaval.ca', teams: true, cell: false, cellNum: '' };
+    const contact = Object.assign({}, contactDefaults, store.contact);
+    $('contactNom').value = contact.nom; $('contactCourriel').value = contact.courriel;
+    $('contactTeams').checked = contact.teams; $('contactCell').checked = contact.cell; $('contactCellNum').value = contact.cellNum;
+    function readContact() {
+        contact.nom = $('contactNom').value.trim(); contact.courriel = $('contactCourriel').value.trim();
+        contact.teams = $('contactTeams').checked; contact.cellNum = $('contactCellNum').value.trim();
+        if (contact.cellNum && !$('contactCell').checked && document.activeElement === $('contactCellNum')) $('contactCell').checked = true;
+        contact.cell = $('contactCell').checked;
+        store.contact = contact; save();
+    }
+    ['contactNom', 'contactCourriel', 'contactTeams', 'contactCell', 'contactCellNum'].forEach((id) => {
+        $(id).addEventListener('input', readContact); $(id).addEventListener('change', readContact);
+    });
+
+    // ===== Validation =====
+    function problems() {
+        const out = [];
+        const list = selected();
+        if (!list.length) return ['Aucun étudiant sélectionné.'];
+        list.filter((s) => !s.ni).forEach((s) => out.push(`NI manquant pour ${s.nom}.`));
+        const keys = [...new Set(list.map(keyOf))];
+        for (const k of keys) {
+            const c = courseSettings[k] || {}; const label = k.replace('|', ' · ');
+            if (!c.heures && !c.minutes) out.push(`${label} : durée de l’examen manquante.`);
+            if (!c.calc) out.push(`${label} : calculatrice autorisée (oui ou non) à choisir.`);
+            if (!(c.docs || []).length) out.push(`${label} : aucun document autorisé coché (cocher « Aucun document » au besoin).`);
+        }
+        return out;
+    }
+    function updateButton() {
+        const p = problems();
+        $('generateBtn').disabled = !selected().length;
+        const m = $('genMsg');
+        if (!selected().length) { m.className = 'msg'; m.innerHTML = ''; return; }
+        if (p.length) { m.className = 'msg warn'; m.innerHTML = 'À compléter avant d’imprimer :<ul>' + p.map((x) => `<li>${esc(x)}</li>`).join('') + '</ul>'; }
+        else { m.className = 'msg ok'; m.textContent = `Prêt : ${selected().length} fiche(s).`; }
+    }
+
+    function render() { renderTable(); renderCourses(); updateButton(); }
+
+    // ===== PDF =====
+    let templateBytes = null;
+    async function getTemplate() {
+        if (!templateBytes) {
+            const res = await fetch('gabarit_reprise_facultaire.pdf');
+            if (!res.ok) throw new Error('gabarit introuvable');
+            templateBytes = await res.arrayBuffer();
+        }
+        return templateBytes;
+    }
+    function duree(c) {
+        const h = parseInt(c.heures, 10) || 0, m = parseInt(c.minutes, 10) || 0;
+        if (!h && !m) return '';
+        if (!h) return `${m} minutes`;
+        return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
+    }
+
+    async function generate() {
+        const p = problems();
+        if (p.length && !confirm('Certains champs sont incomplets :\n\n• ' + p.join('\n• ') + '\n\nGénérer quand même?')) return;
+        const btn = $('generateBtn'); btn.disabled = true; btn.textContent = 'Génération…';
+        try {
+            const { PDFDocument, StandardFonts } = PDFLib;
+            const bytes = await getTemplate();
+            const out = await PDFDocument.create();
+            out.setTitle('Reprise d’examen facultaire');
+            out.setAuthor(contact.nom || '');
+            for (const s of selected()) {
+                const doc = await PDFDocument.load(bytes);
+                const form = doc.getForm(); const page = doc.getPage(0);
+                const rect = {};
+                for (const f of form.getFields()) rect[norm(f.getName())] = f.acroField.getWidgets()[0].getRectangle();
+                for (const f of form.getFields()) form.removeField(f);
+                const font = await doc.embedFont(StandardFonts.Helvetica);
+                const safe = (t) => [...String(t)].map((ch) => { try { font.encodeText(ch); return ch; } catch (e) {
+                    const base = ch.normalize('NFD').replace(/[̀-ͯ]/g, ''); try { font.encodeText(base); return base; } catch (e2) { return '?'; } } }).join('');
+                const text = (k, v) => {
+                    if (!v) return; const r = rect[k]; if (!r) return;
+                    const t = safe(v); let size = 11; const maxW = r.width - 6;
+                    while (size > 7 && font.widthOfTextAtSize(t, size) > maxW) size -= 0.5;
+                    page.drawText(t, { x: r.x + 3, y: r.y + 5, size, font });
+                };
+                const check = (k) => {
+                    const r = rect[k]; if (!r) return;
+                    const sz = Math.min(r.width, r.height), x = r.x + (r.width - sz) / 2, y = r.y + (r.height - sz) / 2, i = sz * 0.18;
+                    page.drawLine({ start: { x: x + i, y: y + i }, end: { x: x + sz - i, y: y + sz - i }, thickness: 1.4 });
+                    page.drawLine({ start: { x: x + i, y: y + sz - i }, end: { x: x + sz - i, y: y + i }, thickness: 1.4 });
+                };
+                const c = courseSettings[keyOf(s)] || defaultSettings(s);
+                text(PDF_TEXT.nom, s.nom);
+                text(PDF_TEXT.ni, s.ni);
+                text(PDF_TEXT.cours, c.sigleTitre);
+                text(PDF_TEXT.duree, duree(c));
+                if (c.calc === 'oui') check('oui');
+                if (c.calc === 'non') check('non');
+                (c.docs || []).forEach((d) => check(PDF_CHECK_DOCS[d]));
+                if ((c.docs || []).includes('autre')) text(PDF_TEXT.autreDoc, c.autreDoc);
+                (c.env || []).forEach((d) => check(PDF_CHECK_ENV[d]));
+                if ((c.env || []).includes('autre')) text(PDF_TEXT.autreEnv, c.autreEnv);
+                text(PDF_TEXT.consignes, c.consignes);
+                text(PDF_TEXT.contact, contact.nom);
+                if (contact.teams) check('teams');
+                if (contact.cell) { check('cellulaire'); text(PDF_TEXT.cell, contact.cellNum); }
+                text(PDF_TEXT.courriel, contact.courriel);
+                const [copied] = await out.copyPages(doc, [0]);
+                out.addPage(copied);
+            }
+            const blob = new Blob([await out.save()], { type: 'application/pdf' });
+            const date = $('sessionSelect').value;
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Reprise_examen_facultaire${date ? '_' + date : ''}.pdf`;
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+            const m = $('genMsg'); m.className = 'msg ok';
+            m.textContent = `PDF généré : ${selected().length} fiche(s), une page par étudiant.`;
+        } catch (err) {
+            const m = $('genMsg'); m.className = 'msg err';
+            m.textContent = 'Erreur pendant la génération : ' + err.message;
+        } finally {
+            btn.textContent = 'Générer le PDF des fiches'; btn.disabled = !selected().length;
+        }
+    }
+    $('generateBtn').addEventListener('click', generate);
+
+    render();
+})();
+</script>
+</body>
+</html>
