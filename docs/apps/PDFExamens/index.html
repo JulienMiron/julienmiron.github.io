@@ -596,6 +596,13 @@
             </div>
             <div id="examInfoDetected" class="field-help" style="color:var(--color-text);margin-top:8px;"></div>
         </div>
+
+        <div class="upload-section" id="teacherBoxesUI" style="margin-top:16px;display:none;">
+            <label>☑️ Case de l'enseignant sur la page couverture</label>
+            <div class="field-help">Les cases « Cochez le nom de votre enseignant » ont été repérées dans <code>examen.pdf</code>. Choisissez l'enseignant de chaque section : sa case sera cochée sur la copie de chaque étudiant de cette section. Un enseignant peut avoir plusieurs sections ; une section laissée à « Ne rien cocher » reste vierge.</div>
+            <div id="teacherBoxesDetected" class="field-help" style="color:var(--color-text);margin-top:8px;"></div>
+            <div id="teacherSectionTable"></div>
+        </div>
         </div>
 
         <div class="step-card">
@@ -972,6 +979,10 @@
                             });
                         }
 
+                        // --- CASE DE L'ENSEIGNANT (si les cases ont été détectées et la section associée) ---
+                        const teacherBox = teacherBoxForStudent(student);
+                        if (teacherBox) drawTeacherCheck(firstPage, teacherBox);
+
                         // --- AUTRES PAGES : local · nom · place, en petit en haut à droite ---
                         const otherPagesText = [
                             student.local || '',
@@ -1190,13 +1201,15 @@
                         XLSX.utils.book_append_sheet(recapWB, abandonSheet, 'Abandons');
                     }
                     if (brioSections.length > 0) {
-                        const sectionAssignmentRows = [['Section', 'NRC', 'Locaux utilisés']];
+                        const withTeacher = teacherBoxes.length > 0;
+                        const sectionAssignmentRows = [['Section', 'NRC', 'Locaux utilisés', ...(withTeacher ? ['Enseignant (case cochée)'] : [])]];
                         for (const section of brioSections) {
                             const key = groupKeyForSection(section);
-                            sectionAssignmentRows.push([section, key, (lastGroupRoomUsage.get(key) || []).join(', ')]);
+                            sectionAssignmentRows.push([section, key, (lastGroupRoomUsage.get(key) || []).join(', '),
+                                ...(withTeacher ? [sectionTeacherMap.get(section) || ''] : [])]);
                         }
                         const sectionAssignmentSheet = XLSX.utils.aoa_to_sheet(sectionAssignmentRows);
-                        sectionAssignmentSheet['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 30 }];
+                        sectionAssignmentSheet['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 30 }, { wch: 28 }];
                         XLSX.utils.book_append_sheet(recapWB, sectionAssignmentSheet, 'Attribution sections');
                     }
                     const recapArray = XLSX.write(recapWB, { bookType: 'xlsx', type: 'array' });
@@ -2486,6 +2499,13 @@
                 line(['Il y a ', { b: counts.accom }, ` ${plural(counts.accom, 'étudiant', 'étudiants')} dans le groupe d’accommodement `, { b: section }]);
             }
             line(['Il y a ', { b: horsCampus }, ` ${plural(horsCampus, 'étudiant', 'étudiants')} hors campus`]);
+            if (teacherBoxes.length > 0) {
+                for (const section of brioSections) {
+                    const teacher = sectionTeacherMap.get(section);
+                    if (teacher) line(['Section ', { b: sectionNumber(section) }, ' : case de ', { b: teacher }, ' cochée']);
+                    else line(['⚠️ Section ', { b: sectionNumber(section) }, ' : aucune case cochée (enseignant non choisi)']);
+                }
+            }
             line(['Il y a ', { b: abandons }, ` ${plural(abandons, 'étudiant qui a abandonné', 'étudiants qui ont abandonné')}`]);
 
             const blanks = Math.ceil(examCopies * (getBlankPercent() / 100)) || 0;
@@ -2888,6 +2908,7 @@
             await refreshBrioStudentCache();
             updateColumnMappingVisibility();
             await detectExamInfoFromPdf(folderPdfFile);
+            await detectTeacherBoxesFromPdf(folderPdfFile);
         }
 
         // ===== Nom de l'évaluation et sigle du cours détectés dans examen.pdf =====
@@ -2985,6 +3006,218 @@
                     note.style.color = 'var(--color-warning)';
                 }
             }
+        }
+
+        // ===== Cases « Cochez le nom de votre enseignant » (page couverture de examen.pdf) =====
+        let teacherBoxes = [];                 // [{ name, x, y, size }] en coordonnées PDF (origine en bas à gauche)
+        let sectionTeacherMap = new Map();     // nom de feuille BRIO -> nom de l'enseignant ('' = ne rien cocher)
+        const TEACHER_MAP_STORAGE_KEY = 'pdfexamens.sectionTeacher';
+
+        // Associations retenues d'une fois à l'autre (par numéro de section), pour l'examen suivant du même cours
+        function loadSavedTeacherMap() {
+            try { return JSON.parse(localStorage.getItem(TEACHER_MAP_STORAGE_KEY) || '{}') || {}; } catch (e) { return {}; }
+        }
+        function saveTeacherMap() {
+            try {
+                const saved = loadSavedTeacherMap();
+                for (const [section, teacher] of sectionTeacherMap) saved[sectionNumber(section)] = teacher;
+                localStorage.setItem(TEACHER_MAP_STORAGE_KEY, JSON.stringify(saved));
+            } catch (e) { /* stockage indisponible : sans conséquence */ }
+        }
+
+        // Repère les carrés vides (7 à 25 pt) dessinés sur la page et le texte placé juste à leur droite
+        async function detectTeacherCheckboxes(page) {
+            const OPS = pdfjsLib.OPS;
+            const opList = await page.getOperatorList();
+            const mul = (m, n) => [
+                m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1],
+                m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3],
+                m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]
+            ];
+            const apply = (m, x, y) => [m[0] * x + m[2] * y + m[4], m[1] * x + m[3] * y + m[5]];
+            const identity = [1, 0, 0, 1, 0, 0];
+            let ctm = identity;
+            const stack = [];
+            const squares = [];
+            const considerPolygon = pts => {
+                if (pts.length < 4) return;
+                const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+                const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys);
+                const w = maxX - minX, h = maxY - minY;
+                if (w < 7 || w > 25 || Math.abs(w - h) > 1.5) return;
+                const onEdge = pts.every(([x, y]) =>
+                    Math.min(Math.abs(x - minX), Math.abs(x - maxX)) < 0.8 || Math.min(Math.abs(y - minY), Math.abs(y - maxY)) < 0.8);
+                if (onEdge) squares.push({ x: minX, y: minY, size: (w + h) / 2 });
+            };
+            for (let i = 0; i < opList.fnArray.length; i++) {
+                const fn = opList.fnArray[i];
+                const args = opList.argsArray[i];
+                if (fn === OPS.save) stack.push(ctm);
+                else if (fn === OPS.restore) ctm = stack.pop() || identity;
+                else if (fn === OPS.transform) ctm = mul(ctm, args);
+                else if (fn === OPS.paintFormXObjectBegin) {
+                    stack.push(ctm);
+                    if (Array.isArray(args[0]) && args[0].length === 6) ctm = mul(ctm, args[0]);
+                } else if (fn === OPS.paintFormXObjectEnd) ctm = stack.pop() || identity;
+                else if (fn === OPS.constructPath) {
+                    const ops = args[0], coords = args[1];
+                    let k = 0;
+                    let poly = [];
+                    let curved = false;
+                    const flush = () => { if (!curved) considerPolygon(poly); poly = []; curved = false; };
+                    for (const op of ops) {
+                        if (op === OPS.moveTo) { flush(); poly.push(apply(ctm, coords[k], coords[k + 1])); k += 2; }
+                        else if (op === OPS.lineTo) { poly.push(apply(ctm, coords[k], coords[k + 1])); k += 2; }
+                        else if (op === OPS.rectangle) {
+                            flush();
+                            const [x, y, w, h] = coords.slice(k, k + 4); k += 4;
+                            considerPolygon([apply(ctm, x, y), apply(ctm, x + w, y), apply(ctm, x + w, y + h), apply(ctm, x, y + h)]);
+                        }
+                        else if (op === OPS.curveTo) { k += 6; curved = true; }
+                        else if (op === OPS.curveTo2 || op === OPS.curveTo3) { k += 4; curved = true; }
+                    }
+                    flush();
+                }
+            }
+            if (squares.length === 0) return [];
+
+            const content = await page.getTextContent();
+            const items = content.items
+                .filter(it => it.str && it.str.trim())
+                .map(it => ({ x: it.transform[4], y: it.transform[5], w: it.width || 0, str: it.str }));
+            const boxes = [];
+            for (const sq of squares) {
+                if (boxes.some(b => Math.abs(b.x - sq.x) < 1 && Math.abs(b.y - sq.y) < 1)) continue;
+                const parts = items
+                    .filter(it => it.y >= sq.y - 2 && it.y <= sq.y + sq.size && it.x >= sq.x + sq.size - 1 && it.x <= sq.x + sq.size + 200)
+                    .sort((a, b) => a.x - b.x);
+                if (parts.length === 0 || parts[0].x > sq.x + sq.size + 20) continue;
+                const kept = [parts[0]];
+                for (let j = 1; j < parts.length; j++) {
+                    const prev = kept[kept.length - 1];
+                    if (parts[j].x - (prev.x + prev.w) > 15) break;
+                    kept.push(parts[j]);
+                }
+                const name = kept.map(p => p.str).join(' ').replace(/\s+/g, ' ').trim();
+                if (name.length >= 2) boxes.push({ name, x: sq.x, y: sq.y, size: sq.size });
+            }
+            return boxes.sort((a, b) => b.y - a.y);
+        }
+
+        async function detectTeacherBoxesFromPdf(file) {
+            teacherBoxes = [];
+            const note = document.getElementById('teacherBoxesDetected');
+            if (file && window.pdfjsLib) {
+                try {
+                    const doc = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+                    teacherBoxes = await detectTeacherCheckboxes(await doc.getPage(1));
+                } catch (err) {
+                    console.error('Détection des cases des enseignants dans examen.pdf :', err);
+                    teacherBoxes = [];
+                }
+            }
+            if (note) {
+                note.textContent = teacherBoxes.length > 0
+                    ? `🔍 ${teacherBoxes.length} case${teacherBoxes.length > 1 ? 's' : ''} détectée${teacherBoxes.length > 1 ? 's' : ''} : ${teacherBoxes.map(b => b.name).join(', ')}.`
+                    : '';
+            }
+            renderTeacherMappingUI();
+        }
+
+        // Une liste déroulante par section : un même enseignant peut être choisi pour plusieurs sections
+        function renderTeacherMappingUI() {
+            const block = document.getElementById('teacherBoxesUI');
+            const container = document.getElementById('teacherSectionTable');
+            if (!block || !container) return;
+            const teacherNames = teacherBoxes.map(b => b.name);
+            if (teacherNames.length === 0) {
+                block.style.display = 'none';
+                container.replaceChildren();
+                sectionTeacherMap = new Map();
+                renderVerification();
+                return;
+            }
+            block.style.display = 'block';
+
+            // Valeur de départ : choix déjà fait, sinon choix retenu pour ce numéro de section, sinon l'unique enseignant
+            const saved = loadSavedTeacherMap();
+            const next = new Map();
+            for (const section of brioSections) {
+                let teacher = sectionTeacherMap.has(section) ? sectionTeacherMap.get(section) : saved[sectionNumber(section)];
+                if (teacher === undefined && teacherNames.length === 1) teacher = teacherNames[0];
+                next.set(section, teacherNames.includes(teacher) ? teacher : '');
+            }
+            sectionTeacherMap = next;
+
+            container.replaceChildren();
+            if (brioSections.length === 0) {
+                const p = document.createElement('div');
+                p.className = 'field-help';
+                p.textContent = 'Chargez la liste des étudiants (BRIO.xlsx) pour associer ses sections aux enseignants.';
+                container.appendChild(p);
+                renderVerification();
+                return;
+            }
+            const table = document.createElement('table');
+            table.className = 'nrc-table';
+            const head = table.createTHead().insertRow();
+            for (const text of ['Section', 'Enseignant (case cochée)']) {
+                const th = document.createElement('th');
+                th.textContent = text;
+                head.appendChild(th);
+            }
+            const body = table.createTBody();
+            for (const section of brioSections) {
+                const row = body.insertRow();
+                const cell = row.insertCell();
+                cell.textContent = sectionNumber(section);
+                const count = brioStudentsCache.filter(s => String(s.section || '').trim() === String(section).trim()).length;
+                if (count) {
+                    const span = document.createElement('span');
+                    span.className = 'nrc-count';
+                    span.textContent = `(${count})`;
+                    cell.appendChild(span);
+                }
+                if (sectionNumber(section) !== String(section).trim()) {
+                    const sub = document.createElement('span');
+                    sub.className = 'nrc-section';
+                    sub.textContent = section;
+                    cell.appendChild(sub);
+                }
+                const select = document.createElement('select');
+                select.setAttribute('aria-label', `Enseignant de la section ${sectionNumber(section)}`);
+                for (const value of ['', ...teacherNames]) {
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value || '— Ne rien cocher —';
+                    select.appendChild(option);
+                }
+                select.value = sectionTeacherMap.get(section) || '';
+                select.addEventListener('change', () => {
+                    sectionTeacherMap.set(section, select.value);
+                    saveTeacherMap();
+                    renderVerification();
+                });
+                row.insertCell().appendChild(select);
+            }
+            container.appendChild(table);
+            renderVerification();
+        }
+
+        // Case à cocher (X) de l'enseignant de la section de l'étudiant, s'il y en a une
+        function teacherBoxForStudent(student) {
+            if (teacherBoxes.length === 0) return null;
+            const teacher = sectionTeacherMap.get(student.section);
+            return teacher ? teacherBoxes.find(b => b.name === teacher) || null : null;
+        }
+
+        function drawTeacherCheck(page, box) {
+            const inset = box.size * 0.2;
+            const x0 = box.x + inset, y0 = box.y + inset;
+            const x1 = box.x + box.size - inset, y1 = box.y + box.size - inset;
+            const style = { thickness: 1.6, color: pdfColor('--pdf-text') };
+            page.drawLine({ start: { x: x0, y: y0 }, end: { x: x1, y: y1 }, ...style });
+            page.drawLine({ start: { x: x0, y: y1 }, end: { x: x1, y: y0 }, ...style });
         }
 
         // Le volet « Vérifier / choisir les colonnes » reste replié ; il n'apparaît que si au moins un mappage est disponible
