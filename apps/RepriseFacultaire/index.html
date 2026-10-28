@@ -241,7 +241,7 @@
     // ===== Titres officiels (modifiables dans la page) =====
     const COURSE_TITLES = {
         'STT-1000': 'Probabilités et statistique',
-        'STT-1900': 'Méthodes statistiques pour ingénieurs',
+        'STT-1900': 'Méthodes statistiques pour l’ingénierie',
         'STT-1920': 'Méthodes statistiques',
         'STT-2902': 'Modélisation statistique',
         'STT-4300': 'Régression II',
@@ -444,13 +444,30 @@
 
     // ===== Consignes par cours =====
     const keyOf = (s) => `${s.cours}|${s.evaluation}`;
+    // ===== Consignes par défaut de certains cours (pour tous les utilisateurs) =====
+    // Appliquées dès que le cours est détecté, quel que soit l'examen. Un choix modifié
+    // dans la page reste prioritaire pour ce navigateur.
+    const COURSE_DEFAULTS = {
+        'STT-1000': {
+            sigleTitre: 'STT-1000 – Probabilités et statistique',
+            heures: '2', minutes: '50', calc: 'oui',
+            docs: ['aucun'],
+            env: ['formules', 'enonce']
+        },
+        'STT-1900': {
+            sigleTitre: 'STT-1900 – Méthodes statistiques pour l’ingénierie',
+            heures: '2', minutes: '50', calc: 'oui',
+            docs: ['recto'],
+            env: ['enonce', 'autre'], autreEnv: 'Table de lois'
+        }
+    };
     function defaultSettings(s) {
         const saved = store.courses[keyOf(s)] || store.courses[s.cours] || {};
         const titre = s.titre || COURSE_TITLES[s.cours] || '';
         return Object.assign({
             sigleTitre: [s.cours, titre].filter(Boolean).join(' – '),
             heures: '', minutes: '', calc: '', docs: [], autreDoc: '', env: [], autreEnv: '', consignes: ''
-        }, saved);
+        }, JSON.parse(JSON.stringify(COURSE_DEFAULTS[s.cours] || {})), saved);
     }
     function checkList(prefix, items, chosen, autreVal, autreKey) {
         return items.map(([k, label]) => `
