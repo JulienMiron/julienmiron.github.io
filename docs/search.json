@@ -1,17 +1,24 @@
 [
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "À propos",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Julien Miron",
     "section": "",
-    "text": "Julien Miron est chargé d’enseignement au Département de mathématiques et de statistique de l’Université Laval, où il enseigne des cours de probabilités et de statistique aux premier et deuxième cycles (voir la section Cours).\nCe site regroupe le matériel de cours, les applications interactives et les dépôts publics liés à cet enseignement."
+    "text": "Chargé d’enseignement en statistique\n\n\nDépartement de mathématiques et de statistique, Université Laval. Cette page regroupe mes cours, mes autres sites et mes dépôts GitHub.\n\n\nMes cours À propos Dépôts GitHub"
   },
   {
-    "objectID": "about.html#contact",
-    "href": "about.html#contact",
-    "title": "À propos",
-    "section": "Contact",
-    "text": "Contact\n\nCourriel : julien.miron@mat.ulaval.ca\nGitHub : github.com/JulienMiron\n\nUne erreur à signaler sur ce site ? Ouvrez une issue sur GitHub."
+    "objectID": "index.html#sites",
+    "href": "index.html#sites",
+    "title": "Julien Miron",
+    "section": "Sites",
+    "text": "Sites\n\n\n\n\n\n\n\nSTT-1000\n\n\n\nCours\n\n\n\nDiapositives du cours STT-1000.\n\n\n\n\n\n\n\n\n\nSTT-1900\n\n\n\nCours\n\n\n\nDiapositives du cours STT-1900.\n\n\n\n\n\n\n\n\n\nSTT-1920\n\n\n\nCours\n\n\n\nNotes et exercices du cours STT-1920.\n\n\n\n\n\n\n\n\n\nRégression II - STT-4300\n\n\n\nCours\n\n\n\nNotes et exemples en R du cours STT-4300.\n\n\n\n\n\n\n\n\n\nMéthodes biostatistiques - STT-7360\n\n\n\nCours\n\n\n\nPlan de cours, calendrier, devoirs, projet et études de cas du cours STT-7360.\n\n\n\n\n\n\n\n\n\nGénérateur de PDF d’examens\n\n\n\nOutils\n\n\n\nGénère des PDF d’examens personnalisés avec nom, matricule et numéro de table pour chaque étudiant.\n\n\n\n\n\n\n\n\n\nPartage DMS\n\n\n\nOutils\n\n\n\nDocuments et guides partagés pour les auxiliaires d’enseignement et surveillants d’examens du département.\n\n\n\n\n\n\n\n\n\nGS vers Brio\n\n\n\nOutils\n\n\n\nConvertit un fichier de notes GradeScope en format CorrectionOptique pour BRIO.\n\n\n\n\n\nAucun article correspondant"
+  },
+  {
+    "objectID": "index.html#depots",
+    "href": "index.html#depots",
+    "title": "Julien Miron",
+    "section": "Dépôts GitHub",
+    "text": "Dépôts GitHub\nListe mise à jour automatiquement à partir de mon profil GitHub.\n\nChargement des dépôts…\n\n\n\nUne question ou une erreur à signaler ? Ouvrez une issue sur GitHub."
   },
   {
     "objectID": "cours/STT-1000/STT-1000.html",
@@ -35,25 +42,18 @@
     "text": "python3 envoi_courriels.py --recap Recapitulatif_etudiants_TEST.xlsx --log test_log.csv\npython3 envoi_courriels.py --recap Recapitulatif_etudiants_TEST.xlsx --log test_log.csv --envoyer\n(3 réguliers, 3 accommodements, 3 hors campus ; --limite 1 pour n’en envoyer qu’un.)"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Julien Miron",
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "À propos",
     "section": "",
-    "text": "Chargé d’enseignement en statistique\n\n\nDépartement de mathématiques et de statistique, Université Laval. Cette page regroupe mes cours, mes autres sites et mes dépôts GitHub.\n\n\nMes cours À propos Dépôts GitHub"
+    "text": "Julien Miron est chargé d’enseignement au Département de mathématiques et de statistique de l’Université Laval, où il enseigne des cours de probabilités et de statistique aux premier et deuxième cycles (voir la section Cours).\nCe site regroupe le matériel de cours, les applications interactives et les dépôts publics liés à cet enseignement."
   },
   {
-    "objectID": "index.html#sites",
-    "href": "index.html#sites",
-    "title": "Julien Miron",
-    "section": "Sites",
-    "text": "Sites\n\n\n\n\n\n\n\nSTT-1000\n\n\n\nCours\n\n\n\nDiapositives du cours STT-1000.\n\n\n\n\n\n\n\n\n\nSTT-1900\n\n\n\nCours\n\n\n\nDiapositives du cours STT-1900.\n\n\n\n\n\n\n\n\n\nSTT-1920\n\n\n\nCours\n\n\n\nNotes et exercices du cours STT-1920.\n\n\n\n\n\n\n\n\n\nRégression II - STT-4300\n\n\n\nCours\n\n\n\nNotes et exemples en R du cours STT-4300.\n\n\n\n\n\n\n\n\n\nMéthodes biostatistiques - STT-7360\n\n\n\nCours\n\n\n\nPlan de cours, calendrier, devoirs, projet et études de cas du cours STT-7360.\n\n\n\n\n\n\n\n\n\nGénérateur de PDF d’examens\n\n\n\nOutils\n\n\n\nGénère des PDF d’examens personnalisés avec nom, matricule et numéro de table pour chaque étudiant.\n\n\n\n\n\n\n\n\n\nPartage DMS\n\n\n\nOutils\n\n\n\nDocuments et guides partagés pour les auxiliaires d’enseignement et surveillants d’examens du département.\n\n\n\n\n\n\n\n\n\nGS vers Brio\n\n\n\nOutils\n\n\n\nConvertit un fichier de notes GradeScope en format CorrectionOptique pour BRIO.\n\n\n\n\n\nAucun article correspondant"
-  },
-  {
-    "objectID": "index.html#depots",
-    "href": "index.html#depots",
-    "title": "Julien Miron",
-    "section": "Dépôts GitHub",
-    "text": "Dépôts GitHub\nListe mise à jour automatiquement à partir de mon profil GitHub.\n\nChargement des dépôts…\n\n\n\nUne question ou une erreur à signaler ? Ouvrez une issue sur GitHub."
+    "objectID": "about.html#contact",
+    "href": "about.html#contact",
+    "title": "À propos",
+    "section": "Contact",
+    "text": "Contact\n\nCourriel : julien.miron@mat.ulaval.ca\nGitHub : github.com/JulienMiron\n\nUne erreur à signaler sur ce site ? Ouvrez une issue sur GitHub."
   },
   {
     "objectID": "cours/STT-1900/STT-1900.html",
