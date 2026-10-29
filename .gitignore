@@ -4,3 +4,6 @@
 
 # Fichiers d' essai locaux de l' outil PDFExamens (donnees personnelles, ne pas publier)
 apps/PDFExamens/*.xlsx
+
+# Fichiers systeme macOS
+.DS_Store
