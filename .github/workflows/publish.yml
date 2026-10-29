@@ -7,8 +7,11 @@ on:
     - cron: "0 5 * * *"   # minuit, heure de Québec (05:00 UTC en hiver, 01:00 en été)
   workflow_dispatch:
 
+# Le site est publié directement sur GitHub Pages : le CI n'écrit jamais dans main.
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
   group: publish-site
@@ -23,6 +26,8 @@ jobs:
         with:
           fetch-depth: 0   # nécessaire pour dater les fichiers (scripts/maj_liens_partagedms.py)
 
+      # Modifie seulement la copie de travail du CI : les liens sont à jour sur le site publié,
+      # sans commit dans main.
       - name: Mettre à jour les liens de PartageDMS
         run: python3 scripts/maj_liens_partagedms.py
 
@@ -34,10 +39,21 @@ jobs:
       - name: Rendre le site (quarto render)
         run: quarto render
 
-      - name: Publier les changements dans docs/
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Configurer GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Téléverser le site rendu
+        uses: actions/upload-pages-artifact@v3
         with:
-          commit_message: "Rendu automatique du site (CI)"
-          file_pattern: docs/** apps/PartageDMS/index.html
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          path: docs
+
+  deploy:
+    needs: render
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publier sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

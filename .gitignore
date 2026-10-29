@@ -7,3 +7,6 @@ apps/PDFExamens/*.xlsx
 
 # Fichiers systeme macOS
 .DS_Store
+
+# Site rendu par Quarto (publié par le CI directement sur GitHub Pages)
+/docs/
