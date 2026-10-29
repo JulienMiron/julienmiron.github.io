@@ -54,6 +54,8 @@ website:
         text: Dépôts
       - href: about.qmd
         text: À propos
+      - href: horaire.qmd
+        text: Horaire
     tools:
       - icon: github
         href: https://github.com/JulienMiron

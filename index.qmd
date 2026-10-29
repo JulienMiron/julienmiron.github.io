@@ -25,7 +25,7 @@ listing:
 
 <div class="home-actions">
 <a class="home-action home-action--primary" href="#sites"><span>Mes cours</span></a>
-<a class="home-action home-action--secondary" href="about.qmd"><span>À propos</span></a>
+<a class="home-action home-action--secondary" href="horaire.qmd"><span>Horaire</span></a>
 <a class="home-action home-action--secondary" href="#depots"><span>Dépôts GitHub</span></a>
 </div>
 

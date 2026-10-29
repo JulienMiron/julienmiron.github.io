@@ -1,0 +1,29 @@
+---
+title: "Horaire de la semaine"
+toc: false
+---
+
+<!-- Pour remplir : écrire le sigle, le type et le local dans la case
+     voulue, p. ex. « STT-1000 — Cours (PLT-2501) ».
+     Pour un cours de 3 h, répéter le sigle sur les trois lignes
+     ou écrire « ↓ » dans les cases suivantes. -->
+
+::: {.horaire}
+
+| Heure       | Lundi | Mardi | Mercredi | Jeudi | Vendredi |
+|:------------|:------|:------|:---------|:------|:---------|
+| 8 h 30      |       |       |          |       | STT-7360         |
+| 9 h 30      |       |       |          |       |      ↓    |
+| 10 h 30     |       |       |          |       |    ↓      |
+| 11 h 30     |       |       |          |       |          |
+| 12 h 30     |       |       |          |       |          |
+| 13 h 30     |       |       |          |       |          |
+| 14 h 30     |       |       |          |       |          |
+| 15 h 30     |       |       |          |       |          |
+| 16 h 30     |       |       |          |       |          |
+| 17 h 30     |       |       |          |       |          |
+| 18 h 30     |       |       |          |       |          |
+| 19 h 30     |       |       |          |       |          |
+| 20 h 30     |       |       |          |       |          |
+
+:::

@@ -2703,3 +2703,30 @@ blockquote { border-left: 4px solid var(--ulaval-yellow); padding-left: 1rem; co
 .depot-meta a {
   color: var(--blue);
 }
+/* Horaire de la semaine (horaire.qmd) */
+.horaire table {
+  table-layout: fixed;
+  width: 100%;
+  border: 1px solid var(--line);
+}
+.horaire th,
+.horaire td {
+  border: 1px solid var(--line);
+  height: 2.6rem;
+  vertical-align: top;
+  font-size: .9rem;
+}
+.horaire th {
+  background: var(--soft);
+  text-align: center;
+}
+.horaire td:first-child,
+.horaire th:first-child {
+  width: 6rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+@media (max-width: 600px) {
+  .horaire { overflow-x: auto; }
+  .horaire table { min-width: 36rem; }
+}
